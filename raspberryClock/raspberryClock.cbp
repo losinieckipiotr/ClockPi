@@ -31,7 +31,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="raspberryClock/Application.cpp" />
+		<Unit filename="raspberryClock/Application.h" />
+		<Unit filename="raspberryClock/BMP180.cpp" />
+		<Unit filename="raspberryClock/BMP180.h" />
+		<Unit filename="raspberryClock/main.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
