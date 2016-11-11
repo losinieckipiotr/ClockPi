@@ -35,6 +35,38 @@ static int wiringPiSPIDataRW(int channel, unsigned char *data, int len)
 	return 1;
 }
 
+
+static int wiringPiI2CRead(int fd)
+{
+	return 1;
+}
+static int wiringPiI2CReadReg8(int fd, int reg)
+{
+	return 1;
+}
+static int wiringPiI2CReadReg16(int fd, int reg)
+{
+	return 1;
+}
+
+static int wiringPiI2CWrite(int fd, int data)
+{
+	return 1;
+}
+static int wiringPiI2CWriteReg8(int fd, int reg, int data)
+{
+	return 1;
+}
+static int wiringPiI2CWriteReg16(int fd, int reg, int data)
+{
+	return 1;
+}
+
+static int wiringPiI2CSetup(const int devId)
+{
+	return 1;
+}
+
 static void delay(unsigned int del)
 {
 	std::this_thread::sleep_for(

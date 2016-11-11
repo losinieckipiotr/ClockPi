@@ -19,7 +19,7 @@ constexpr auto BMP180_CAL_AC3 =         0xAE;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_AC4 =         0xB0;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_AC5 =         0xB2;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_AC6 =         0xB4;  //Calibration data (16 bits)
-constexpr auto BMP180_CAL_B1 =          0xB6; //Calibration data (16 bits)
+constexpr auto BMP180_CAL_B1 =          0xB6;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_B2 =          0xB8;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_MB =          0xBA;  //Calibration data (16 bits)
 constexpr auto BMP180_CAL_MC =          0xBC;  //Calibration data (16 bits)
@@ -46,15 +46,15 @@ public:
 	float ReadSealevelPressure();
 
 private:
-    int8_t ReadI2CByte(int regAdr);
-    uint16_t ReadI2CU16(int regAdr);
-    int16_t ReadI2CS16(int regAdr);
-    void WriteI2CByte(int reg, int val);
-    int ReadRawTemp();
-    int ReadRawPressure();
+	char I2C_readByte(int reg);
+	unsigned short I2C_readU16(int reg);
+	short I2C_readS16(int reg);
+	void I2C_writeByte(int reg, int val);
+	int read_raw_temp();
+	int read_raw_pressure();
 
-    int16_t AC1, AC2, AC3, B1, B2, MB, MC, MD;
-    uint16_t AC4, AC5, AC6;
+	short AC1, AC2, AC3, B1, B2, MB, MC, MD;
+	unsigned short AC4, AC5, AC6;
     int fd;
 };
 

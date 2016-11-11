@@ -8,6 +8,7 @@
 #endif // FAKE_WP
 
 #include <iostream>
+#include <iomanip>
 #include <exception>
 #include <stdexcept>
 
@@ -32,9 +33,10 @@ void Application::Start()
 
     while(1)
     {
-        cout << "Temperature: " << sensor_.ReadTemperature() << " C" << endl;
-        cout << "Pressure: " << sensor_.ReadPressure() / 100.0f << " Pa" << endl;
-        cout << "Altitude: " << sensor_.ReadAltitude() << " m" << endl;
+        cout << "Temperature: " << setprecision(5) << sensor_.ReadTemperature() << " C" << endl;
+        cout << "Pressure: " << setprecision(5) << sensor_.ReadPressure() / 100.0f << " Pa" << endl;
+		cout << "Sealevel pressure: " << setprecision(5)  << sensor_.ReadSealevelPressure() / 100.0f << " Pa" << endl;
+		cout << endl;
 
         delay(1000);
     }
