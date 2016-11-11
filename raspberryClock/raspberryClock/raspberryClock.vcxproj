@@ -149,11 +149,15 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BMP180.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SSD1306.cpp" />
+    <ClCompile Include="WiringPi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="BMP180.h" />
     <ClInclude Include="fakeWiringPi.hpp" />
+    <ClInclude Include="SSD1306.h" />
+    <ClInclude Include="WiringPi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

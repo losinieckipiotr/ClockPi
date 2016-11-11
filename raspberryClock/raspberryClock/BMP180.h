@@ -1,6 +1,8 @@
 #ifndef BMP180_H
 #define BMP180_H
 
+#include "WiringPi.h"
+
 #include <cstdint>
 
 //i2c address
@@ -38,6 +40,7 @@ public:
 	BMP180();
 	~BMP180();
 
+	void SetupI2C();
 	void Calibrate();
 
 	float ReadTemperature();
@@ -56,6 +59,8 @@ private:
 	short AC1, AC2, AC3, B1, B2, MB, MC, MD;
 	unsigned short AC4, AC5, AC6;
     int fd;
+
+	WiringPi& wiringPi_;
 };
 
 #endif // !BMP180_H

@@ -1,24 +1,22 @@
 #include "BMP180.h"
 
-#ifndef FAKE_WP
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#else
-#include "fakeWiringPi.hpp"
-#endif // FAKE_WP
-
 #include <cmath>
 
 constexpr auto OSS = BMP180_STANDARD;
 
-BMP180::BMP180()
+BMP180::BMP180() : wiringPi_(WiringPi::GetInstance())
 {
-    fd = wiringPiI2CSetup(BMP180_Address);
+	
 }
 
 BMP180::~BMP180()
 {
 
+}
+
+void BMP180::SetupI2C()
+{
+	fd = wiringPi_.I2CSetupAdr(BMP180_Address);
 }
 
 void BMP180::Calibrate()
@@ -102,7 +100,7 @@ float BMP180::ReadSealevelPressure()
 
 char BMP180::I2C_readByte(int reg)
 {
-	return (char)wiringPiI2CReadReg8(fd, reg);
+	return (char)wiringPi_.I2CReadReg8(fd, reg);
 }
 
 unsigned short BMP180::I2C_readU16(int reg)
@@ -124,14 +122,14 @@ short BMP180::I2C_readS16(int reg)
 
 void BMP180::I2C_writeByte(int reg, int val)
 {
-	wiringPiI2CWriteReg8(fd, reg, val);
+	wiringPi_.I2CWriteReg8(fd, reg, val);
 }
 
 int BMP180::read_raw_temp()
 {
 	int raw;
 	I2C_writeByte(BMP180_CONTROL, BMP180_READTEMPCMD);
-	delay(5);  //5ms;
+	wiringPi_.Delay(5);  //5ms;
 	raw = I2C_readByte(BMP180_TEMPDATA) << 8;
 	raw += I2C_readByte(BMP180_TEMPDATA + 1);
 	return raw;
@@ -144,13 +142,13 @@ int BMP180::read_raw_pressure()
 	switch (OSS)
 	{
 	case BMP180_ULTRALOWPOWER:
-		delay(5); break;
+		wiringPi_.Delay(5); break;
 	case BMP180_HIGHRES:
-		delay(14); break;
+		wiringPi_.Delay(14); break;
 	case BMP180_ULTRAHIGHRES:
-		delay(26); break;
+		wiringPi_.Delay(26); break;
 	default:
-		delay(8);
+		wiringPi_.Delay(8);
 	}
 	MSB = I2C_readByte(BMP180_PRESSUREDATA);
 	LSB = I2C_readByte(BMP180_PRESSUREDATA + 1);

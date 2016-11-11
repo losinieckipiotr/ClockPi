@@ -24,6 +24,12 @@
     <ClCompile Include="BMP180.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SSD1306.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WiringPi.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -33,6 +39,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fakeWiringPi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SSD1306.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WiringPi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
