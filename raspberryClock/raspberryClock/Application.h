@@ -15,6 +15,8 @@ public:
 	void Start();
 
 private:
+    void Measure();
+
 	WiringPi wiringPi_;
 
 	OLED::SSD1306 screen_;

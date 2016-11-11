@@ -30,8 +30,8 @@ void Application::Start()
 	screen_.Begin();
 
 	OLED::Font16x8 font;
-	const auto h1 = 16;
-	const auto h2 = 48;
+	const auto h1 = 0;
+	const auto h2 = 32;
 
 	sensor_.SetupI2C();
 	sensor_.Calibrate();
@@ -49,22 +49,30 @@ void Application::Start()
 
 		auto pos = strTemp.find('.');
         auto size = strTemp.size();
-        if ((pos + 3) < size)
-            strTemp.erase(pos + 3);
+        if ((pos + 2) < size)
+            strTemp.erase(pos + 2);
+        strTemp = "T: " + strTemp + " C";
 
         pos = strPre.find('.');
-        size = strPre.size();
-        if ((pos + 3) < size)
-            strPre.erase(pos + 3);
+        strPre.erase(pos);
+        strPre = "P: " + strPre + " Pa";
 
-		screen_.Write(0, h1, "T: " + strTemp + " C", font);
-		screen_.Write(0, h2, "P: " + strPre + " Pa", font);
+        auto x1 = (OLED::SCREEN_WIDTH - strTemp.length()*font.charWidth) / 2;
+        auto x2 = (OLED::SCREEN_WIDTH - strPre.length()*font.charWidth) / 2;
+
+		screen_.Write(x1, h1, strTemp, font);
+		screen_.Write(x2, h2, strPre, font);
 		screen_.Display();
 
-        cout << "Temperature: " << strTemp << " C" << endl;
-        cout << "Pressure: " << strPre << " Pa" << endl;
+        cout << strTemp << endl;
+        cout << strPre << endl;
 		cout << endl;
 
         delay(1000);
     }
+}
+
+void Application::Measure()
+{
+
 }
