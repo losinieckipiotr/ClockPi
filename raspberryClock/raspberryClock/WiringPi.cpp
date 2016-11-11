@@ -3,6 +3,7 @@
 #ifndef FAKE_WP
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <wiringPiSPI.h>
 #else
 #include "fakeWiringPi.hpp"
 #endif // FAKE_WP

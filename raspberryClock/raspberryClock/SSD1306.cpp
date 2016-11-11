@@ -73,7 +73,7 @@ void Bitmap::PrepareData_()
 	}
 }
 
-SSD1306::SSD1306() : wiringPi_(WiringPi::GetInstance())
+SSD1306::SSD1306()
 {
 	ClearBuffer();
 }
@@ -234,7 +234,7 @@ std::string Font16x16::FilterString(const std::string& str)
 	return copy;
 }
 
-void Font32x16::WriteOnScreen(uint8_t x, uint8_t y, const std::string& str, SSD1306& screen) const 
+void Font32x16::WriteOnScreen(uint8_t x, uint8_t y, const std::string& str, SSD1306& screen) const
 {
 	auto filtered = FilterString(str);
 	int length = (filtered.length()*charWidth <= SCREEN_WIDTH) ? filtered.length() : SCREEN_WIDTH / charWidth;

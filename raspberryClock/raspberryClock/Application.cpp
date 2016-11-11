@@ -13,7 +13,7 @@
 
 using namespace std;
 
-Application::Application() : wiringPi_(WiringPi::GetInstance())
+Application::Application()
 {
 
 }
@@ -44,12 +44,25 @@ void Application::Start()
 		temp = sensor_.ReadTemperature();
 		pressure = sensor_.ReadPressure() / 100.0f;
 
-		screen_.Write(0, h1, "T: " + to_string(temp) + " C", font);
-		screen_.Write(0, h2, "P: " + to_string(temp) + " Pa", font);
+		auto strTemp = to_string(temp);
+		auto strPre = to_string(pressure);
+
+		auto pos = strTemp.find('.');
+        auto size = strTemp.size();
+        if ((pos + 3) < size)
+            strTemp.erase(pos + 3);
+
+        pos = strPre.find('.');
+        size = strPre.size();
+        if ((pos + 3) < size)
+            strPre.erase(pos + 3);
+
+		screen_.Write(0, h1, "T: " + strTemp + " C", font);
+		screen_.Write(0, h2, "P: " + strPre + " Pa", font);
 		screen_.Display();
 
-        cout << "Temperature: " << setprecision(5) << temp << " C" << endl;
-        cout << "Pressure: " << setprecision(5) << pressure << " Pa" << endl;
+        cout << "Temperature: " << strTemp << " C" << endl;
+        cout << "Pressure: " << strPre << " Pa" << endl;
 		cout << endl;
 
         delay(1000);

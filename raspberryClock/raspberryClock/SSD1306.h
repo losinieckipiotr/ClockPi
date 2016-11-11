@@ -112,7 +112,7 @@ private:
 	enum { BUFFER_SIZE = 1024 };
 
 	std::array<uint8_t, BUFFER_SIZE> buffer_;
-	WiringPi& wiringPi_;
+	WiringPi wiringPi_;
 };
 
 class IFont

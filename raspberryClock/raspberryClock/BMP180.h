@@ -60,7 +60,7 @@ private:
 	unsigned short AC4, AC5, AC6;
     int fd;
 
-	WiringPi& wiringPi_;
+	WiringPi wiringPi_;
 };
 
 #endif // !BMP180_H

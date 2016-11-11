@@ -15,7 +15,7 @@ public:
 	void Start();
 
 private:
-	WiringPi& wiringPi_;
+	WiringPi wiringPi_;
 
 	OLED::SSD1306 screen_;
 	BMP180 sensor_;

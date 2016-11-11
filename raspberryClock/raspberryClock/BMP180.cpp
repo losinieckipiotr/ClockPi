@@ -4,9 +4,9 @@
 
 constexpr auto OSS = BMP180_STANDARD;
 
-BMP180::BMP180() : wiringPi_(WiringPi::GetInstance())
+BMP180::BMP180()
 {
-	
+
 }
 
 BMP180::~BMP180()

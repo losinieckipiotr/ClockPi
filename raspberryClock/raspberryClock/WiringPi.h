@@ -9,11 +9,6 @@ public:
 	WiringPi() { }
 	~WiringPi() { }
 
-	static WiringPi GetInstance()
-	{
-		return WiringPi();
-	}
-
 	static bool WasSetup() { return wiringPiWasInit; }
 
 	static int Setup();

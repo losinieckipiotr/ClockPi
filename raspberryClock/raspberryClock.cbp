@@ -35,6 +35,11 @@
 		<Unit filename="raspberryClock/Application.h" />
 		<Unit filename="raspberryClock/BMP180.cpp" />
 		<Unit filename="raspberryClock/BMP180.h" />
+		<Unit filename="raspberryClock/SSD1306.cpp" />
+		<Unit filename="raspberryClock/SSD1306.h" />
+		<Unit filename="raspberryClock/WiringPi.cpp" />
+		<Unit filename="raspberryClock/WiringPi.h" />
+		<Unit filename="raspberryClock/fakeWiringPi.hpp" />
 		<Unit filename="raspberryClock/main.cpp" />
 		<Extensions>
 			<code_completion />
