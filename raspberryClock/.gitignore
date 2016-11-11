@@ -27,3 +27,11 @@
 *.exe
 *.out
 *.app
+
+# codeblocks
+/bin
+/obj
+*.depend
+*.html
+
+
