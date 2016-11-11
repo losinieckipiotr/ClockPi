@@ -32,5 +32,8 @@
     <ClInclude Include="BMP180.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fakeWiringPi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

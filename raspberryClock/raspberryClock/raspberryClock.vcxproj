@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="BMP180.h" />
+    <ClInclude Include="fakeWiringPi.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
