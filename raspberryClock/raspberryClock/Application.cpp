@@ -111,12 +111,19 @@ void Application::DisplayMeasure(const Result& res)
 
 void Application::DisplayClock()
 {
-	const OLED::Font32x16 font;
+	const OLED::Font16x8 font1;
+	const OLED::Font32x16 font2;
 
 	const auto now = system_clock::now();
 
 	const auto timeT = system_clock::to_time_t(now);
 	const auto timeNow = localtime(&timeT);
+
+	auto dateStr = to_string(timeNow->tm_mday) +
+		'.' +
+		to_string(timeNow->tm_mon + 1) +
+		'.' +
+		to_string(timeNow->tm_year + 2000 - 100);
 
 	auto timeStr = to_string(timeNow->tm_hour / 10) +
 		to_string(timeNow->tm_hour % 10) +
@@ -127,10 +134,14 @@ void Application::DisplayClock()
 		to_string(timeNow->tm_sec / 10) +
 		to_string(timeNow->tm_sec % 10);
 
-	if (timeStr.length() == 8)
-	{
-		screen_.Write(0, 16, timeStr, font);
-	}
+	unsigned int centerPos = (OLED::SCREEN_WIDTH - dateStr.length()*font1.charWidth) / 2;
+	screen_.Write(centerPos, 0, dateStr, font1);
+	screen_.Write(0, 16, timeStr, font2);
+
+	cout << dateStr << endl;
+	cout << timeStr << endl;
+	cout << endl;
+
 	screen_.Display();
 }
 
