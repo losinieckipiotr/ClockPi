@@ -233,7 +233,7 @@ public:
 	inline uint8_t Width() const noexcept { return charWidth; }
 	inline uint8_t Height() const noexcept { return charHeight; }
 
-	void WriteOnScreen(uint8_t x, uint8_t y, const std::string & str, SSD1306& screen) const;
+	void WriteOnScreen(uint8_t x, uint8_t y, const std::string& str, SSD1306& screen) const;
 
 protected:
 	static std::string FilterString(const std::string& str);

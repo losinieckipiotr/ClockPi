@@ -240,7 +240,7 @@ void Font32x16::WriteOnScreen(uint8_t x, uint8_t y, const std::string& str, SSD1
 	int length = (filtered.length()*charWidth <= SCREEN_WIDTH) ? filtered.length() : SCREEN_WIDTH / charWidth;
 	for (auto i = 0; i < length; ++i)
 	{
-		fonts::SSD1306_char1616(x + (i*charWidth), y, filtered[i], screen);
+		fonts::SSD1306_char3216(x + (i*charWidth), y, filtered[i], screen);
 	}
 }
 

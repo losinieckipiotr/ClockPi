@@ -131,6 +131,7 @@ void Application::DisplayClock()
 	{
 		screen_.Write(0, 16, timeStr, font);
 	}
+	screen_.Display();
 }
 
 Result Application::Measure()
