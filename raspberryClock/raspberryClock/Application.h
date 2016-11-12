@@ -11,6 +11,9 @@
 
 #include <deque>
 #include <thread>
+#include <chrono>
+
+using timeP = std::chrono::system_clock::time_point;
 
 class Application
 {
@@ -21,7 +24,6 @@ public:
 	void Start();
 
 private:
-
 	enum class  DisplayMode
 	{
 		MEASURE,
@@ -29,9 +31,9 @@ private:
 	};
 
 	void DisplayMeasure(const Result& res);
-	void DisplayClock();
+	void DisplayClock(const timeP& now);
 
-	Result Measure();
+	Result Measure(const timeP& now);
 	void LoadResults();
 	void SaveResults();
 

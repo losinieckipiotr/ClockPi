@@ -8,7 +8,6 @@
 #include <ctime>
 #include <fstream>
 #include <utility>
-#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -48,7 +47,9 @@ void Application::Start()
 	{
 		while (flag)
 		{
-			Result res = Measure();
+			const auto now = system_clock::now();
+
+			Result res = Measure(now);
 
 			if (res.temperature > 40.0f)
 				buzzer_.On();
@@ -61,13 +62,16 @@ void Application::Start()
 				DisplayMeasure(res);
 				break;
 			case DisplayMode::COLCK:
-				DisplayClock();
+				DisplayClock(now);
 				break;
 			default:
 				break;
 			}
 
-			wiringPi_.Delay(1000);
+			const timeP tp;//epoch
+			const auto sec = duration_cast<seconds>(now - tp);//seconds from epoch
+			const auto nexTime = tp + sec + seconds(1);//now plus 1 second
+		    this_thread::sleep_until(nexTime);
 		}
 	});
 
@@ -109,23 +113,21 @@ void Application::DisplayMeasure(const Result& res)
 	cout << endl;
 }
 
-void Application::DisplayClock()
+void Application::DisplayClock(const timeP& now)
 {
 	const OLED::Font16x8 font1;
 	const OLED::Font32x16 font2;
 
-	const auto now = system_clock::now();
-
 	const auto timeT = system_clock::to_time_t(now);
 	const auto timeNow = localtime(&timeT);
 
-	auto dateStr = to_string(timeNow->tm_mday) +
+	const auto dateStr = to_string(timeNow->tm_mday) +
 		'.' +
 		to_string(timeNow->tm_mon + 1) +
 		'.' +
 		to_string(timeNow->tm_year + 2000 - 100);
 
-	auto timeStr = to_string(timeNow->tm_hour / 10) +
+	const auto timeStr = to_string(timeNow->tm_hour / 10) +
 		to_string(timeNow->tm_hour % 10) +
 		':' +
 		to_string(timeNow->tm_min / 10) +
@@ -145,12 +147,12 @@ void Application::DisplayClock()
 	screen_.Display();
 }
 
-Result Application::Measure()
+Result Application::Measure(const timeP& now)
 {
 	Result res;
 	res.temperature = sensor_.ReadTemperature();
 	res.pressure = sensor_.ReadPressure();
-	res.timeStamp = chrono::system_clock::now();
+	res.timeStamp = now;
 	resultsCollection_.push_back(res);
 	return res;
 }
@@ -171,7 +173,6 @@ void Application::LoadResults()
 			system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
 			res.timeStamp = t + sysClockTicks;
 			resultsCollection_.push_back(move(res));
-
 		}
 	}
 	catch (const std::exception&) { } //ignore
