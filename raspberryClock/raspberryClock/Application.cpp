@@ -8,6 +8,7 @@
 #include <memory>
 #include <ctime>
 #include <fstream>
+#include <utility>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -104,19 +105,17 @@ void Application::LoadResults()
 	{
 		pt::ptree tree;
 		pt::read_json(FILE_NAME_JSON, tree);
-		auto& resultsNode = tree.get_child("measurement");
+		auto& resultsNode = tree.get_child("results");
 		for (pt::ptree::value_type& val : resultsNode)
 		{
-			if (val.first == "result")//node name
-			{
-				Result res;
-				res.temperature = val.second.get<float>("temperature");
-				res.pressure = val.second.get<float>("pressure");
-				chrono::system_clock::time_point t;//epoch
-				chrono::system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
-				res.timeStamp = t + sysClockTicks;
-				resultsCollection_.push_back(move(res));
-			}
+			Result res;
+			res.temperature = val.second.get<float>("temperature");
+			res.pressure = val.second.get<float>("pressure");
+			chrono::system_clock::time_point t;//epoch
+			chrono::system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
+			res.timeStamp = t + sysClockTicks;
+			resultsCollection_.push_back(move(res));
+
 		}
 	}
 	catch (const std::exception&) { } //ignore
@@ -125,15 +124,18 @@ void Application::LoadResults()
 void Application::SaveResults()
 {
 	pt::ptree tree;
-	tree.put("measurement", "");
+	pt::ptree results;
 
 	for (const auto& res : resultsCollection_)
 	{
-		auto& node = tree.add("measurement.result", "");
+		pt::ptree node;
 		node.put("temperature", res.temperature);
 		node.put("pressure", res.pressure);
 		node.put("timeStamp", res.timeStamp.time_since_epoch().count());
+		results.push_back(make_pair("", node));
 	}
+	tree.add_child("results", results);
+
 	pt::write_json(FILE_NAME_JSON, tree);
 
 	/*ofstream file(FILE_NAME_CSV, ios::trunc);
