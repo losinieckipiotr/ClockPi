@@ -22,6 +22,15 @@ public:
 
 private:
 
+	enum class  DisplayMode
+	{
+		MEASURE,
+		COLCK
+	};
+
+	void DisplayMeasure(const Result& res);
+	void DisplayClock();
+
 	Result Measure();
 	void LoadResults();
 	void SaveResults();
@@ -31,6 +40,8 @@ private:
 	OLED::SSD1306 screen_;
 	BMP180 sensor_;
 	Buzzer buzzer_;
+
+	DisplayMode mode_;
 
 	std::deque<Result> resultsCollection_;
 	std::thread measureTh_;

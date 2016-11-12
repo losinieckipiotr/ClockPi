@@ -8,17 +8,19 @@
 #include <ctime>
 #include <fstream>
 #include <utility>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
+using namespace chrono;
 namespace pt = boost::property_tree;
 
 constexpr auto FILE_NAME_JSON = "measurement.json";
 //constexpr auto FILE_NAME_CSV = "measurement.csv";
 
-Application::Application()
+Application::Application() : mode_(DisplayMode::COLCK)
 {
 
 }
@@ -44,42 +46,26 @@ void Application::Start()
 	bool flag = true;
 	measureTh_ = thread([this, &flag]()
 	{
-		const OLED::Font16x8 font;
-		const unsigned int h1 = 0;
-		const unsigned int h2 = 32;
-		
 		while (flag)
 		{
 			Result res = Measure();
 
-			if (res.temperature > 31.0f)
+			if (res.temperature > 40.0f)
 				buzzer_.On();
 			else
 				buzzer_.Off();
 
-			auto strTemp = to_string(res.temperature);
-			auto strPre = to_string(res.pressure);
-
-			auto pos = strTemp.find('.');
-			auto size = strTemp.size();
-			if ((pos + 2) < size)
-				strTemp.erase(pos + 2);
-			strTemp = "T: " + strTemp + " C";
-
-			pos = strPre.find('.');
-			strPre.erase(pos);
-			strPre = "P: " + strPre + " Pa";
-
-			unsigned int x1 = (OLED::SCREEN_WIDTH - strTemp.length()*font.charWidth) / 2;
-			unsigned int x2 = (OLED::SCREEN_WIDTH - strPre.length()*font.charWidth) / 2;
-
-			screen_.Write(x1, h1, strTemp, font);
-			screen_.Write(x2, h2, strPre, font);
-			screen_.Display();
-
-			cout << strTemp << endl;
-			cout << strPre << endl;
-			cout << endl;
+			switch (mode_)
+			{
+			case DisplayMode::MEASURE:
+				DisplayMeasure(res);
+				break;
+			case DisplayMode::COLCK:
+				DisplayClock();
+				break;
+			default:
+				break;
+			}
 
 			wiringPi_.Delay(1000);
 		}
@@ -90,6 +76,61 @@ void Application::Start()
 	measureTh_.join();
 
 	SaveResults();
+}
+
+void Application::DisplayMeasure(const Result& res)
+{
+	const OLED::Font16x8 font;
+	const unsigned int h1 = 0;
+	const unsigned int h2 = 32;
+
+	auto strTemp = to_string(res.temperature);
+	auto strPre = to_string(res.pressure);
+
+	auto pos = strTemp.find('.');
+	auto size = strTemp.size();
+	if ((pos + 2) < size)
+		strTemp.erase(pos + 2);
+	strTemp = "T: " + strTemp + " C";
+
+	pos = strPre.find('.');
+	strPre.erase(pos);
+	strPre = "P: " + strPre + " Pa";
+
+	unsigned int x1 = (OLED::SCREEN_WIDTH - strTemp.length()*font.charWidth) / 2;
+	unsigned int x2 = (OLED::SCREEN_WIDTH - strPre.length()*font.charWidth) / 2;
+
+	screen_.Write(x1, h1, strTemp, font);
+	screen_.Write(x2, h2, strPre, font);
+	screen_.Display();
+
+	cout << strTemp << endl;
+	cout << strPre << endl;
+	cout << endl;
+}
+
+void Application::DisplayClock()
+{
+	const OLED::Font32x16 font;
+
+	const auto now = system_clock::now();
+
+	const auto timeT = system_clock::to_time_t(now);
+	const auto timeNow = localtime(&timeT);
+
+	auto timeStr = to_string(timeNow->tm_hour / 10) +
+		to_string(timeNow->tm_hour % 10) +
+		':' +
+		to_string(timeNow->tm_min / 10) +
+		to_string(timeNow->tm_min % 10) +
+		':' +
+		to_string(timeNow->tm_sec / 10) +
+		to_string(timeNow->tm_sec % 10);
+
+	if (timeStr.length() == 8)
+	{
+		screen_.Write(0, 16, timeStr, font);
+	}
 }
 
 Result Application::Measure()
@@ -114,8 +155,8 @@ void Application::LoadResults()
 			Result res;
 			res.temperature = val.second.get<float>("temperature");
 			res.pressure = val.second.get<float>("pressure");
-			chrono::system_clock::time_point t;//epoch
-			chrono::system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
+			system_clock::time_point t;//epoch
+			system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
 			res.timeStamp = t + sysClockTicks;
 			resultsCollection_.push_back(move(res));
 
