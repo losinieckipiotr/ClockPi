@@ -33,9 +33,14 @@ void Application::Start()
 	LoadResults();
 
 	wiringPi_.Setup();
+
 	screen_.Begin();
+
 	sensor_.SetupI2C();
 	sensor_.Calibrate();
+
+	buzzer_.Setup();
+	buzzer_.On();
 
 	bool flag = true;
 	thread th([this, &flag]()

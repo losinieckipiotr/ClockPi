@@ -4,9 +4,13 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <wiringPiSPI.h>
+#include <pcf8574.h>
 #else
 #include "fakeWiringPi.hpp"
 #endif // FAKE_WP
+
+constexpr auto PCF8574_Address = 0x20;
+constexpr auto EXTEND_BASE = 64;
 
 bool WiringPi::wiringPiWasInit = false;
 
@@ -85,4 +89,14 @@ int WiringPi::I2CWriteReg16(int fd, int reg, int data)
 void WiringPi::Delay(unsigned int del)
 {
 	delay(del);
+}
+
+void WiringPi::DelayMicros(unsigned int howLong)
+{
+	delayMicroseconds(howLong);
+}
+
+int WiringPi::PCF8574Setup()
+{
+	return pcf8574Setup(EXTEND_BASE, PCF8574_Address);
 }

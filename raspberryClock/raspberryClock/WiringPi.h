@@ -28,6 +28,9 @@ public:
 	static int I2CWriteReg16(int fd, int reg, int data);
 
 	static void Delay(unsigned int del);
+	static void DelayMicros(unsigned int howLong);
+
+	static int PCF8574Setup();
 
 private:
 	static bool wiringPiWasInit;

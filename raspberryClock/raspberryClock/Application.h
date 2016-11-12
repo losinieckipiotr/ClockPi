@@ -7,6 +7,7 @@
 
 #include "SSD1306.h"
 #include "BMP180.h"
+#include "Buzzer.h"
 
 #include <deque>
 
@@ -27,6 +28,7 @@ private:
 
 	OLED::SSD1306 screen_;
 	BMP180 sensor_;
+	Buzzer buzzer_;
 
 	std::deque<Result> resultsCollection_;
 };

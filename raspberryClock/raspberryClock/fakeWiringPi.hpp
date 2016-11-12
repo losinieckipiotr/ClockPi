@@ -72,5 +72,17 @@ static void delay(unsigned int del)
 	std::this_thread::sleep_for(
 		std::chrono::milliseconds(del));
 }
+
+static void delayMicroseconds(unsigned int howLong)
+{
+	std::this_thread::sleep_for(
+		std::chrono::microseconds(howLong));
+}
+
+static int pcf8574Setup(const int pinBase, const int i2cAddress)
+{
+	return 1;
+}
+
 #endif // !FAKE_WIRING_PI_H
 

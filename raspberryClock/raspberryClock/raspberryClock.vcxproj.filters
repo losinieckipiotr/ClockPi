@@ -30,6 +30,9 @@
     <ClCompile Include="WiringPi.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="Buzzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Result.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Buzzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
