@@ -4,7 +4,7 @@ using namespace std;
 
 constexpr auto BEEP = 64 + 7;
 
-Buzzer::Buzzer() : period_(DEFAULT_PERIOD)
+Buzzer::Buzzer() : workerFlag(false), period_(DEFAULT_PERIOD)
 {
 
 }
@@ -21,9 +21,12 @@ void Buzzer::Setup()
 
 void Buzzer::On()
 {
-	Off();
-	workerFlag = true;
-	worker_ = thread([this]() { workerFunc(); });
+	if (!workerFlag)
+	{
+		Off();
+		workerFlag = true;
+		worker_ = thread([this]() { workerFunc(); });
+	}
 }
 
 void Buzzer::Off()

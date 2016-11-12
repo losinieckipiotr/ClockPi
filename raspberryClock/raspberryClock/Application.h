@@ -10,6 +10,7 @@
 #include "Buzzer.h"
 
 #include <deque>
+#include <thread>
 
 class Application
 {
@@ -20,6 +21,7 @@ public:
 	void Start();
 
 private:
+
 	Result Measure();
 	void LoadResults();
 	void SaveResults();
@@ -31,6 +33,7 @@ private:
 	Buzzer buzzer_;
 
 	std::deque<Result> resultsCollection_;
+	std::thread measureTh_;
 };
 
 #endif // !APPLICATION_H

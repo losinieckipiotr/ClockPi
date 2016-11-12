@@ -3,7 +3,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <thread>
 #include <exception>
 #include <memory>
 #include <ctime>
@@ -41,11 +40,9 @@ void Application::Start()
 	sensor_.Calibrate();
 
 	buzzer_.Setup();
-	buzzer_.SetPeriod(Buzzer::DEFAULT_PERIOD);
-	buzzer_.On();
 
 	bool flag = true;
-	thread th([this, &flag]()
+	measureTh_ = thread([this, &flag]()
 	{
 		const OLED::Font16x8 font;
 		const unsigned int h1 = 0;
@@ -54,6 +51,11 @@ void Application::Start()
 		while (flag)
 		{
 			Result res = Measure();
+
+			if (res.temperature > 31.0f)
+				buzzer_.On();
+			else
+				buzzer_.Off();
 
 			auto strTemp = to_string(res.temperature);
 			auto strPre = to_string(res.pressure);
@@ -82,9 +84,10 @@ void Application::Start()
 			wiringPi_.Delay(1000);
 		}
 	});
+
 	cin.get();
 	flag = false;
-	th.join();
+	measureTh_.join();
 
 	SaveResults();
 }
