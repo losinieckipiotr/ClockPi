@@ -28,7 +28,7 @@ private:
 public:
 	enum 
 	{
-		defaultPeriod = 10000 * 2
+		DEFAULT_PERIOD = 500
 	};
 };
 

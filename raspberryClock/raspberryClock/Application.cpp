@@ -40,6 +40,7 @@ void Application::Start()
 	sensor_.Calibrate();
 
 	buzzer_.Setup();
+	buzzer_.SetPeriod(Buzzer::DEFAULT_PERIOD);
 	buzzer_.On();
 
 	bool flag = true;

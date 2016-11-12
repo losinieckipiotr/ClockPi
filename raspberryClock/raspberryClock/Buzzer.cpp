@@ -4,7 +4,7 @@ using namespace std;
 
 constexpr auto BEEP = 64 + 7;
 
-Buzzer::Buzzer() : period_(defaultPeriod)
+Buzzer::Buzzer() : period_(DEFAULT_PERIOD)
 {
 
 }
@@ -38,8 +38,9 @@ void Buzzer::workerFunc() const
 	while (workerFlag)
 	{
 		wiringPi_.DigitalWrite(BEEP, 0);
-		wiringPi_.DelayMicros(period_ / 2);
+		wiringPi_.Delay(period_ / 2);
 		wiringPi_.DigitalWrite(BEEP, 1);
-		wiringPi_.DelayMicros(period_ / 2);
+		wiringPi_.Delay(period_ / 2);
 	}
+	wiringPi_.DigitalWrite(BEEP, 1);
 }
