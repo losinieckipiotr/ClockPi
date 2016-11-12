@@ -3,8 +3,12 @@
 
 #include "WiringPi.h"
 
+#include "Result.hpp"
+
 #include "SSD1306.h"
 #include "BMP180.h"
+
+#include <deque>
 
 class Application
 {
@@ -15,12 +19,16 @@ public:
 	void Start();
 
 private:
-    void Measure();
+	Result Measure();
+	void LoadResults();
+	void SaveResults();
 
 	WiringPi wiringPi_;
 
 	OLED::SSD1306 screen_;
 	BMP180 sensor_;
+
+	std::deque<Result> resultsCollection_;
 };
 
 #endif // !APPLICATION_H

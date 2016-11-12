@@ -35,4 +35,7 @@
 *.html
 *.layout
 
+raspberryClock/*.json
+raspberryClock/*.csv
+
 

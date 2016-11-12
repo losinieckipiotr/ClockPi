@@ -46,7 +46,7 @@ float BMP180::ReadTemperature()
 	return T;
 }
 
-int BMP180::ReadPressure()
+float BMP180::ReadPressure()
 {
 	int P;
 	int UT, UP, X1, X2, X3, B3, B5, B6;
@@ -76,7 +76,7 @@ int BMP180::ReadPressure()
 	X1 = (X1 * 3038) >> 16;
 	X2 = (-7357 * P) >> 16;
 	P = P + ((X1 + X2 + 3791) >> 4);
-	return P;
+	return P / 100.0f;
 
 }
 float BMP180::ReadAltitude()

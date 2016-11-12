@@ -44,7 +44,7 @@ public:
 	void Calibrate();
 
 	float ReadTemperature();
-	int ReadPressure();
+	float ReadPressure();
 	float ReadAltitude();
 	float ReadSealevelPressure();
 
