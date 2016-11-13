@@ -15,6 +15,7 @@ public:
 	static void SetPinMode(int pin, int mode);
 
 	static void DigitalWrite(int pin, int value);
+	static int DigitalRead(int pin);
 
 	static int SPISetup(int channel, int speed);
 	static int SPIDataRW(int channel, unsigned char* data, int len);
@@ -31,6 +32,8 @@ public:
 	static void DelayMicros(unsigned int howLong);
 
 	static int PCF8574Setup();
+
+	static void pullUpDn(int pin, int pud);
 
 private:
 	static bool wiringPiWasInit;

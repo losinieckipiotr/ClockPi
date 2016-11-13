@@ -42,6 +42,22 @@ void Application::Start()
 
 	buzzer_.Setup();
 
+	auto handler = [this]()
+	{
+		switch (mode_)
+		{
+		case DisplayMode::MEASURE:
+			mode_ = DisplayMode::COLCK;
+			break;
+		case DisplayMode::COLCK:
+			mode_ = DisplayMode::MEASURE;
+			break;
+		default:
+			break;
+		}
+	};
+	button_.Setup(handler);
+
 	bool flag = true;
 	measureTh_ = thread([this, &flag]()
 	{

@@ -25,6 +25,11 @@ static void digitalWrite(int pin, int value)
 
 }
 
+static int digitalRead(int pin)
+{
+	return 1;//TO DO: random
+}
+
 static int wiringPiSPISetup(int channel, int speed)
 {
 	return 1;
@@ -82,6 +87,11 @@ static void delayMicroseconds(unsigned int howLong)
 static int pcf8574Setup(const int pinBase, const int i2cAddress)
 {
 	return 1;
+}
+
+static void pullUpDnControl(int pin, int pud)
+{
+
 }
 
 #endif // !FAKE_WIRING_PI_H

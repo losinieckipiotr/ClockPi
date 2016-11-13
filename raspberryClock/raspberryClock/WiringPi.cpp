@@ -37,6 +37,11 @@ void WiringPi::DigitalWrite(int pin, int value)
 	digitalWrite(pin, value);
 }
 
+int WiringPi::DigitalRead(int pin)
+{
+	return digitalRead(pin);
+}
+
 int WiringPi::SPISetup(int channel, int speed)
 {
 	int retVal = wiringPiSPISetup(channel, speed);
@@ -99,4 +104,9 @@ void WiringPi::DelayMicros(unsigned int howLong)
 int WiringPi::PCF8574Setup()
 {
 	return pcf8574Setup(EXTEND_BASE, PCF8574_Address);
+}
+
+void WiringPi::pullUpDn(int pin, int pud)
+{
+	pullUpDnControl(pin, pud);
 }
