@@ -11,6 +11,7 @@ public:
 	~Buzzer();
 
 	void Setup();
+	bool IsOn() { return workerFlag; }
 	void On();
 	void Off();
 

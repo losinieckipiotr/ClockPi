@@ -42,7 +42,7 @@ void Application::Start()
 
 	buzzer_.Setup();
 
-	auto handler = [this]()
+	auto clickHandler = [this]()
 	{
 		switch (mode_)
 		{
@@ -56,7 +56,14 @@ void Application::Start()
 			break;
 		}
 	};
-	button_.Setup(handler);
+	auto holdHandler = [this]()
+	{
+		if (buzzer_.IsOn())
+			buzzer_.Off();
+		else
+			buzzer_.On();
+	};
+	button_.Setup(clickHandler, holdHandler);
 
 	bool flag = true;
 	measureTh_ = thread([this, &flag]()
@@ -67,10 +74,10 @@ void Application::Start()
 
 			Result res = Measure(now);
 
-			if (res.temperature > 40.0f)
+			/*if (res.temperature > 40.0f)
 				buzzer_.On();
 			else
-				buzzer_.Off();
+				buzzer_.Off();*/
 
 			switch (mode_)
 			{

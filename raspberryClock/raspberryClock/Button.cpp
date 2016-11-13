@@ -15,11 +15,12 @@ Button::~Button()
 	ShutdownWorker();
 }
 
-void Button::Setup(std::function<void(void)> handler)
+void Button::Setup(handlerType clickHandler, handlerType holdHandler)
 {
 	wiringPi_.SetPinMode(PIN, 0);//input mode
 	wiringPi_.pullUpDn(PIN, 2);//pull up
-	handler_ = handler;
+	clickHandler_ = clickHandler;
+	holdHandler_ = holdHandler;
 	StartWorker();
 }
 
@@ -31,16 +32,22 @@ void Button::StartWorker()
 	{
 		while (work_)
 		{
+			holdCtr_ = 0;
 			if (wiringPi_.DigitalRead(PIN) == 0)
 			{
-				handler_();//call handler
-
-				//end if button released
 				while (wiringPi_.DigitalRead(PIN) == 0 && work_)
-					wiringPi_.Delay(100);
-			}
+				{
+					if (holdCtr_ == HOLD_TICKS)
+						holdHandler_();
 
-			wiringPi_.Delay(100);
+					++holdCtr_;
+					wiringPi_.Delay(INTERVAL);
+				}
+				if(holdCtr_ < HOLD_TICKS)
+					clickHandler_();
+					
+			}
+			wiringPi_.Delay(INTERVAL);
 		}
 	});
 }
