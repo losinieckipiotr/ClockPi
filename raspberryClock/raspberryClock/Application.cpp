@@ -42,67 +42,77 @@ void Application::Start()
 
 	buzzer_.Setup();
 
-	auto clickHandler = [this]()
-	{
-		switch (mode_)
-		{
-		case DisplayMode::MEASURE:
-			mode_ = DisplayMode::COLCK;
-			break;
-		case DisplayMode::COLCK:
-			mode_ = DisplayMode::MEASURE;
-			break;
-		default:
-			break;
-		}
-	};
-	auto holdHandler = [this]()
-	{
-		if (buzzer_.IsOn())
-			buzzer_.Off();
-		else
-			buzzer_.On();
-	};
+	auto clickHandler = [this]() { NextDisplayMode(); };
+	auto holdHandler = [this]() { SwitchBuzzer(); };
 	button_.Setup(clickHandler, holdHandler);
-
-	bool flag = true;
-	measureTh_ = thread([this, &flag]()
-	{
-		while (flag)
-		{
-			const auto now = system_clock::now();
-
-			Result res = Measure(now);
-
-			/*if (res.temperature > 40.0f)
-				buzzer_.On();
-			else
-				buzzer_.Off();*/
-
-			switch (mode_)
-			{
-			case DisplayMode::MEASURE:
-				DisplayMeasure(res);
-				break;
-			case DisplayMode::COLCK:
-				DisplayClock(now);
-				break;
-			default:
-				break;
-			}
-
-			const timeP tp;//epoch
-			const auto sec = duration_cast<seconds>(now - tp);//seconds from epoch
-			const auto nexTime = tp + sec + seconds(1);//now plus 1 second
-		    this_thread::sleep_until(nexTime);
-		}
-	});
-
-	cin.get();
-	flag = false;
+	
+	appFlag_ = true;//application exit flag
+	measureTh_ = thread([this]() { DisplayLoop(); });//main loop
+	cin.get();//locks main thread
+	appFlag_ = false;
 	measureTh_.join();
 
 	SaveResults();
+}
+
+void Application::NextDisplayMode()
+{
+	switch (mode_)
+	{
+	case DisplayMode::MEASURE:
+		mode_ = DisplayMode::COLCK;
+		break;
+	case DisplayMode::COLCK:
+		mode_ = DisplayMode::MEASURE;
+		break;
+	default:
+		break;
+	}
+}
+
+void Application::SwitchBuzzer()
+{
+	if (buzzer_.IsOn())
+		buzzer_.Off();
+	else
+		buzzer_.On();
+}
+
+void Application::DisplayLoop()
+{
+	while (appFlag_)
+	{
+		const auto now = system_clock::now();
+		MeasureAndDisplay(now);
+		LoopDelay(now);
+	}
+}
+
+void Application::MeasureAndDisplay(const timeP& now)
+{
+	lock_guard<mutex> lck(appMutex_);
+	Result res = Measure(now);
+	switch (mode_)
+	{
+	case DisplayMode::MEASURE:
+		DisplayMeasure(res);
+		break;
+	case DisplayMode::COLCK:
+		DisplayClock(now);
+		break;
+	default:
+		break;
+	}
+}
+
+Result Application::Measure(const timeP& now)
+{
+	Result res;
+	res.temperature = sensor_.ReadTemperature();
+	res.pressure = sensor_.ReadPressure();
+	res.timeStamp = now;
+	resultsCollection_.push_back(res);
+	return res;
 }
 
 void Application::DisplayMeasure(const Result& res)
@@ -170,14 +180,12 @@ void Application::DisplayClock(const timeP& now)
 	screen_.Display();
 }
 
-Result Application::Measure(const timeP& now)
+void Application::LoopDelay(const timeP& now)
 {
-	Result res;
-	res.temperature = sensor_.ReadTemperature();
-	res.pressure = sensor_.ReadPressure();
-	res.timeStamp = now;
-	resultsCollection_.push_back(res);
-	return res;
+	const timeP tp;//epoch
+	const auto sec = duration_cast<seconds>(now - tp);//seconds from epoch
+	const auto nexTime = tp + sec + seconds(1);//now plus 1 second
+	this_thread::sleep_until(nexTime);
 }
 
 void Application::LoadResults()

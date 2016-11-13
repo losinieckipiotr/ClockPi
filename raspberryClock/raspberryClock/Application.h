@@ -12,6 +12,8 @@
 
 #include <deque>
 #include <thread>
+#include <mutex>
+#include <atomic>
 #include <chrono>
 
 using timeP = std::chrono::system_clock::time_point;
@@ -31,10 +33,16 @@ private:
 		COLCK
 	};
 
+	void NextDisplayMode();
+	void SwitchBuzzer();
+
+	void DisplayLoop();
+	void MeasureAndDisplay(const timeP& now);
+	Result Measure(const timeP& now);
 	void DisplayMeasure(const Result& res);
 	void DisplayClock(const timeP& now);
+	void LoopDelay(const timeP& now);
 
-	Result Measure(const timeP& now);
 	void LoadResults();
 	void SaveResults();
 
@@ -48,8 +56,10 @@ private:
 	DisplayMode mode_;
 
 	std::deque<Result> resultsCollection_;
+
+	std::atomic<bool> appFlag_;
 	std::thread measureTh_;
+	std::mutex appMutex_;
 };
 
 #endif // !APPLICATION_H
-
