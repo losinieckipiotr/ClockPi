@@ -35,6 +35,13 @@
 		<Unit filename="raspberryClock/Application.h" />
 		<Unit filename="raspberryClock/BMP180.cpp" />
 		<Unit filename="raspberryClock/BMP180.h" />
+		<Unit filename="raspberryClock/Button.cpp" />
+		<Unit filename="raspberryClock/Button.h" />
+		<Unit filename="raspberryClock/Buzzer.cpp" />
+		<Unit filename="raspberryClock/Buzzer.h" />
+		<Unit filename="raspberryClock/ClockManager.cpp" />
+		<Unit filename="raspberryClock/ClockManager.h" />
+		<Unit filename="raspberryClock/Result.hpp" />
 		<Unit filename="raspberryClock/SSD1306.cpp" />
 		<Unit filename="raspberryClock/SSD1306.h" />
 		<Unit filename="raspberryClock/WiringPi.cpp" />

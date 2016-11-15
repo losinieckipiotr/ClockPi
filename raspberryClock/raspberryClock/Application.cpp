@@ -42,16 +42,26 @@ void Application::Start()
 
 	buzzer_.Setup();
 
-	const auto alarmTime_t = system_clock::to_time_t(
-		system_clock::now() + chrono::seconds(30));
-	const auto timeStruct = localtime(&alarmTime_t);
-	clockMan_.SetAlarm(timeStruct->tm_hour, timeStruct->tm_min);
+	auto setMinute = [this]()
+	{
+        const auto alarmTime_t = system_clock::to_time_t(
+        system_clock::now() + chrono::minutes(1));
+        const auto timeStruct = localtime(&alarmTime_t);
+        clockMan_.SetAlarm(timeStruct->tm_hour, timeStruct->tm_min);
+	};
 
 	auto clickHandler = [this]() { NextDisplayMode(); };
 	//auto holdHandler = [this]() { SwitchBuzzer(); };
-	auto holdHandler = [this]() { clockMan_.DisableAlarm(); };
+	auto holdHandler = [this, setMinute]()
+	{
+        if(clockMan_.GetAlarmTime() != timeP())
+            clockMan_.DisableAlarm();
+        else
+            setMinute();
+    };
+
 	button_.Setup(clickHandler, holdHandler);
-	
+
 	appFlag_ = true;//application exit flag
 	measureTh_ = thread([this]() { DisplayLoop(); });//main loop
 	cin.get();//locks main thread
@@ -67,9 +77,11 @@ void Application::NextDisplayMode()
 	{
 	case DisplayMode::MEASURE:
 		mode_ = DisplayMode::COLCK;
+		DisplayClock(system_clock::now());
 		break;
 	case DisplayMode::COLCK:
 		mode_ = DisplayMode::MEASURE;
+		DisplayMeasure(resultsCollection_.back());
 		break;
 	default:
 		break;

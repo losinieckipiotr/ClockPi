@@ -3,6 +3,7 @@
 #include "Buzzer.h"
 
 #include <ctime>
+#include <iostream>
 
 using namespace std;
 using namespace chrono;
@@ -35,9 +36,11 @@ void ClockManager::SetAlarm(int hours, int minutes)
 	localTimeStruct->tm_sec = 0;
 	auto alarmTime = mktime(localTimeStruct);
 	auto alarmTimePoint = system_clock::from_time_t(alarmTime);
-	if (now < alarmTimePoint)
+	if (now > alarmTimePoint)
 		alarmTimePoint += chrono::hours(24);//add 1 day
 	alarmTime_ = alarmTimePoint;
+	isSet_ = true;
+	cout << "Alarm was set to: " << ctime(&alarmTime);
 }
 
 void ClockManager::DisableAlarm()
@@ -46,12 +49,14 @@ void ClockManager::DisableAlarm()
 	buzzer_.Off();
 }
 
-bool ClockManager::UpdateTime(timeP now)
+bool ClockManager::UpdateTime(const timeP& now)
 {
 	if (isSet_)
 	{
 		if (alarmTime_ <= now)
 		{
+            cout << "Alarm!" << endl;
+
 			buzzer_.On();
 			return true;
 		}

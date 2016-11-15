@@ -17,7 +17,7 @@ public:
 	void SetAlarm(int hours, int minutes);//h:00-23 m:00-59
 	void DisableAlarm();
 
-	bool UpdateTime(timeP now);
+	bool UpdateTime(const timeP& now);
 
 private:
 	bool isSet_;

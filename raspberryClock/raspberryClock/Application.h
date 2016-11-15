@@ -50,13 +50,13 @@ private:
 
 	WiringPi wiringPi_;
 
-	OLED::SSD1306 screen_;
+	DisplayMode mode_;
+
+    OLED::SSD1306 screen_;
 	BMP180 sensor_;
 	Buzzer buzzer_;
 	ClockManager clockMan_;
 	Button button_;
-
-	DisplayMode mode_;
 
 	std::deque<Result> resultsCollection_;
 
