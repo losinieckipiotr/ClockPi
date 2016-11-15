@@ -19,7 +19,7 @@ namespace pt = boost::property_tree;
 constexpr auto FILE_NAME_JSON = "measurement.json";
 //constexpr auto FILE_NAME_CSV = "measurement.csv";
 
-Application::Application() : mode_(DisplayMode::COLCK)
+Application::Application() : mode_(DisplayMode::COLCK), clockMan_(buzzer_)
 {
 
 }
@@ -42,8 +42,14 @@ void Application::Start()
 
 	buzzer_.Setup();
 
+	const auto alarmTime_t = system_clock::to_time_t(
+		system_clock::now() + chrono::seconds(30));
+	const auto timeStruct = localtime(&alarmTime_t);
+	clockMan_.SetAlarm(timeStruct->tm_hour, timeStruct->tm_min);
+
 	auto clickHandler = [this]() { NextDisplayMode(); };
-	auto holdHandler = [this]() { SwitchBuzzer(); };
+	//auto holdHandler = [this]() { SwitchBuzzer(); };
+	auto holdHandler = [this]() { clockMan_.DisableAlarm(); };
 	button_.Setup(clickHandler, holdHandler);
 	
 	appFlag_ = true;//application exit flag
@@ -92,6 +98,10 @@ void Application::MeasureAndDisplay(const timeP& now)
 {
 	lock_guard<mutex> lck(appMutex_);
 	Result res = Measure(now);
+
+	if(clockMan_.UpdateTime(now))
+		mode_ = DisplayMode::COLCK;
+
 	switch (mode_)
 	{
 	case DisplayMode::MEASURE:

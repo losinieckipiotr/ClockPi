@@ -8,7 +8,9 @@
 #include "SSD1306.h"
 #include "BMP180.h"
 #include "Buzzer.h"
+#include "ClockManager.h"
 #include "Button.h"
+
 
 #include <deque>
 #include <thread>
@@ -51,6 +53,7 @@ private:
 	OLED::SSD1306 screen_;
 	BMP180 sensor_;
 	Buzzer buzzer_;
+	ClockManager clockMan_;
 	Button button_;
 
 	DisplayMode mode_;
