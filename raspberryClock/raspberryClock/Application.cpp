@@ -19,7 +19,7 @@ namespace pt = boost::property_tree;
 constexpr auto FILE_NAME_JSON = "measurement.json";
 //constexpr auto FILE_NAME_CSV = "measurement.csv";
 
-Application::Application() : mode_(DisplayMode::COLCK), clockMan_(buzzer_)
+Application::Application() : mode_(DisplayMode::COLCK)
 {
 
 }
@@ -42,22 +42,23 @@ void Application::Start()
 
 	buzzer_.Setup();
 
-	auto setMinute = [this]()
+	auto alarmHandler = [this]() { buzzer_.On(); };
+	auto disableAlarmHandler = [this]() { buzzer_.Off(); };
+	auto setMinute = [this, alarmHandler, disableAlarmHandler]()
 	{
         const auto alarmTime_t = system_clock::to_time_t(
         system_clock::now() + chrono::minutes(1));
         const auto timeStruct = localtime(&alarmTime_t);
-        clockMan_.SetAlarm(timeStruct->tm_hour, timeStruct->tm_min);
+		alarmMan_.SetAlarm(	timeStruct->tm_hour, timeStruct->tm_min,
+							alarmHandler, disableAlarmHandler);
 	};
-
 	auto clickHandler = [this]() { NextDisplayMode(); };
-	//auto holdHandler = [this]() { SwitchBuzzer(); };
 	auto holdHandler = [this, setMinute]()
 	{
-        if(clockMan_.GetAlarmTime() != timeP())
-            clockMan_.DisableAlarm();
-        else
-            setMinute();
+		if (alarmMan_.IsAlarmSet())
+			alarmMan_.DisableAlarm();
+		else
+			setMinute();
     };
 
 	button_.Setup(clickHandler, holdHandler);
@@ -110,9 +111,6 @@ void Application::MeasureAndDisplay(const timeP& now)
 {
 	lock_guard<mutex> lck(appMutex_);
 	Result res = Measure(now);
-
-	if(clockMan_.UpdateTime(now))
-		mode_ = DisplayMode::COLCK;
 
 	switch (mode_)
 	{

@@ -36,7 +36,7 @@
     <ClCompile Include="Button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClockManager.cpp">
+    <ClCompile Include="AlarmManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,7 +65,7 @@
     <ClInclude Include="Button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClockManager.h">
+    <ClInclude Include="AlarmManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

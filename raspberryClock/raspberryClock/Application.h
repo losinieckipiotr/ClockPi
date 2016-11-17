@@ -8,9 +8,8 @@
 #include "SSD1306.h"
 #include "BMP180.h"
 #include "Buzzer.h"
-#include "ClockManager.h"
+#include "AlarmManager.h"
 #include "Button.h"
-
 
 #include <deque>
 #include <thread>
@@ -55,7 +54,7 @@ private:
     OLED::SSD1306 screen_;
 	BMP180 sensor_;
 	Buzzer buzzer_;
-	ClockManager clockMan_;
+	AlarmManager alarmMan_;
 	Button button_;
 
 	std::deque<Result> resultsCollection_;
