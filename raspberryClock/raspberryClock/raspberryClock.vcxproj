@@ -91,7 +91,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;FAKE_WP;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;FAKE_WP;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -155,7 +155,10 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Buzzer.cpp" />
     <ClCompile Include="AlarmManager.cpp" />
+    <ClCompile Include="Listener.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="Session.cpp" />
     <ClCompile Include="SSD1306.cpp" />
     <ClCompile Include="WiringPi.cpp" />
   </ItemGroup>
@@ -166,7 +169,10 @@
     <ClInclude Include="Buzzer.h" />
     <ClInclude Include="AlarmManager.h" />
     <ClInclude Include="fakeWiringPi.hpp" />
+    <ClInclude Include="Listener.h" />
     <ClInclude Include="Result.hpp" />
+    <ClInclude Include="Server.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="SSD1306.h" />
     <ClInclude Include="WiringPi.h" />
   </ItemGroup>
