@@ -49,6 +49,7 @@ private:
 
 	WiringPi wiringPi_;
 
+    bool alarmRinging_;
 	DisplayMode mode_;
 
     OLED::SSD1306 screen_;

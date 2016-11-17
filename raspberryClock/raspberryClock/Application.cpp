@@ -19,7 +19,7 @@ namespace pt = boost::property_tree;
 constexpr auto FILE_NAME_JSON = "measurement.json";
 //constexpr auto FILE_NAME_CSV = "measurement.csv";
 
-Application::Application() : mode_(DisplayMode::COLCK)
+Application::Application() : alarmRinging_(false), mode_(DisplayMode::COLCK)
 {
 
 }
@@ -42,8 +42,15 @@ void Application::Start()
 
 	buzzer_.Setup();
 
-	auto alarmHandler = [this]() { buzzer_.On(); };
-	auto disableAlarmHandler = [this]() { buzzer_.Off(); };
+	auto alarmHandler = [this]()
+	{
+        lock_guard<mutex> lck(appMutex_);
+        alarmRinging_ = true;
+        mode_ = DisplayMode::COLCK;
+        DisplayClock(system_clock::now());
+        buzzer_.On();
+    };
+	auto disableAlarmHandler = [this]() { buzzer_.Off(); alarmRinging_ = false; };
 	auto setMinute = [this, alarmHandler, disableAlarmHandler]()
 	{
         const auto alarmTime_t = system_clock::to_time_t(
@@ -52,7 +59,7 @@ void Application::Start()
 		alarmMan_.SetAlarm(	timeStruct->tm_hour, timeStruct->tm_min,
 							alarmHandler, disableAlarmHandler);
 	};
-	auto clickHandler = [this]() { NextDisplayMode(); };
+	auto clickHandler = [this]() { if(!alarmRinging_) NextDisplayMode(); };
 	auto holdHandler = [this, setMinute]()
 	{
 		if (alarmMan_.IsAlarmSet())
@@ -74,6 +81,8 @@ void Application::Start()
 
 void Application::NextDisplayMode()
 {
+    lock_guard<mutex> lck(appMutex_);
+
 	switch (mode_)
 	{
 	case DisplayMode::MEASURE:

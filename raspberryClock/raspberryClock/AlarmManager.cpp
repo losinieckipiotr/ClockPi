@@ -53,8 +53,15 @@ void AlarmManager::SetAlarm(
 
 void AlarmManager::DisableAlarm()
 {
-	disableHandler_();//TO DO: TRY CATCH
-	ClearAlarm();
+	if(isSet_)
+    {
+        ClearAlarm();
+        disableHandler_();//TO DO: TRY CATCH
+    }
+    else
+        ClearAlarm();
+
+	cout << "Alarm disabled" << endl;
 }
 
 void AlarmManager::ClearAlarm()
