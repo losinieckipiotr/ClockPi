@@ -72,6 +72,9 @@ void Application::Start()
 
 	appFlag_ = true;//application exit flag
 	measureTh_ = thread([this]() { DisplayLoop(); });//main loop
+
+	server_.Start();
+
 	cin.get();//locks main thread
 	appFlag_ = false;
 	measureTh_.join();

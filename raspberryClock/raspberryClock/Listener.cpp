@@ -1,5 +1,7 @@
 #include "Listener.h"
 
+#include <string>
+
 namespace ba = boost::asio;
 using errorT = boost::system::error_code;
 
@@ -43,18 +45,19 @@ void Listener::Recive()
 	{
 		if (!ec)
 		{
-			//TO DO: check data?
-			Response();
+			std::string msg(buffer_.data(), bytes);
+			if (msg == "{\"getClockHost\":false}")
+				Response();
 		}
 	});
 }
 
 void Listener::Response()
 {
-	//TO DO: WHAT Response?
+	std::string s("<{\"getClockHost\":true}>");
 	socket_.async_send_to(
-		ba::buffer(buffer_, buffer_.size()),
+		ba::buffer(s.data(), s.size()),
 		remoteEndpoint_,
-		[](const errorT&, size_t) { }); // empty handler
+		[](const errorT&, size_t) { }); // empty handler, ignore errors
 	Recive();
 }

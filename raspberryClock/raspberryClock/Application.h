@@ -11,6 +11,8 @@
 #include "AlarmManager.h"
 #include "Button.h"
 
+#include "Server.h"
+
 #include <deque>
 #include <thread>
 #include <mutex>
@@ -57,6 +59,8 @@ private:
 	Buzzer buzzer_;
 	AlarmManager alarmMan_;
 	Button button_;
+
+	Server server_;
 
 	std::deque<Result> resultsCollection_;
 

@@ -1,5 +1,8 @@
 #include "Session.h"
 
+#include <string>
+#include <iostream>
+
 namespace ba = boost::asio;
 using errorT = boost::system::error_code;
 
@@ -27,10 +30,15 @@ void Session::Recive()
 	{
 		if (!ec)
 		{
-			//TO DO: DO SMOETHING WITH DATA
+			std::string msg(buffer_.data(), bytes);
+			std::cout << msg << std::endl;
+
 			Send();
 		}
-		//TO DO: HANDLE ERROR
+		else
+		{
+			std::cout << ec.message() << std::endl;
+		}
 	});
 }
 
@@ -43,9 +51,8 @@ void Session::Send()
 		[this, self](errorT ec, size_t bytes)
 	{
 		if (!ec)
-		{
 			Recive();
-		}
-		//TO DO: HANDLE ERROR
+		else
+			std::cout << ec.message() << std::endl;
 	});
 }
