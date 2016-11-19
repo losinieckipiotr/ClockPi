@@ -41,9 +41,15 @@
 		<Unit filename="raspberryClock/Button.h" />
 		<Unit filename="raspberryClock/Buzzer.cpp" />
 		<Unit filename="raspberryClock/Buzzer.h" />
+		<Unit filename="raspberryClock/Listener.cpp" />
+		<Unit filename="raspberryClock/Listener.h" />
 		<Unit filename="raspberryClock/Result.hpp" />
 		<Unit filename="raspberryClock/SSD1306.cpp" />
 		<Unit filename="raspberryClock/SSD1306.h" />
+		<Unit filename="raspberryClock/Server.cpp" />
+		<Unit filename="raspberryClock/Server.h" />
+		<Unit filename="raspberryClock/Session.cpp" />
+		<Unit filename="raspberryClock/Session.h" />
 		<Unit filename="raspberryClock/WiringPi.cpp" />
 		<Unit filename="raspberryClock/WiringPi.h" />
 		<Unit filename="raspberryClock/fakeWiringPi.hpp" />

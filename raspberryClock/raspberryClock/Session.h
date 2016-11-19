@@ -28,10 +28,10 @@ private:
 
 	enum { BUFFER_SIZE = 1024 };
 
-	reciveHandlerT reciveHandler_;
-
 	baip::tcp::socket socket_;
-	
+
+    reciveHandlerT reciveHandler_;
+
 	std::array<char, BUFFER_SIZE> buffer_;
 };
 
