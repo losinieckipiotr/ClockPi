@@ -5,22 +5,30 @@
 
 #include <memory>
 #include <array>
+#include <string>
 
 namespace baip = boost::asio::ip;
+
+class Session;
+
+using reciveHandlerT = std::function<void(std::string, std::shared_ptr<Session>)>;
 
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
-	Session(baip::tcp::socket&& socket);
+	Session(baip::tcp::socket&& socket, reciveHandlerT reciveHandler);
 	~Session();
 
 	void Start();
 
+	void Response(std::string msg);
+
 private:
 	void Recive();
-	void Send();
 
-	enum { BUFFER_SIZE = 1024 * 1024 };
+	enum { BUFFER_SIZE = 1024 };
+
+	reciveHandlerT reciveHandler_;
 
 	baip::tcp::socket socket_;
 	
@@ -28,4 +36,3 @@ private:
 };
 
 #endif // !SESSION_H
-

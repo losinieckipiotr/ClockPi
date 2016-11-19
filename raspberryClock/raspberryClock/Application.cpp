@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include "Session.h"
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -70,12 +72,27 @@ void Application::Start()
 
 	button_.Setup(clickHandler, holdHandler);
 
+	auto reciveFrameHandler =
+		[this](string recivedMsg, shared_ptr<Session> session)->void
+	{
+		cout << recivedMsg << endl;
+
+		auto response = recivedMsg;
+		for (auto& c : response)
+			c = toupper(c);
+
+		session->Response(response);
+	};
+
+	server_.Start(reciveFrameHandler);
+
 	appFlag_ = true;//application exit flag
 	measureTh_ = thread([this]() { DisplayLoop(); });//main loop
 
-	server_.Start();
-
 	cin.get();//locks main thread
+
+	server_.Stop();
+
 	appFlag_ = false;
 	measureTh_.join();
 

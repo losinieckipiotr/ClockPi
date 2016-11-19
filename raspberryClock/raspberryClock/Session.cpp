@@ -2,11 +2,14 @@
 
 #include <string>
 #include <iostream>
+#include <future>
 
 namespace ba = boost::asio;
 using errorT = boost::system::error_code;
 
-Session::Session(baip::tcp::socket&& socket) : socket_(std::move(socket))
+Session::Session(baip::tcp::socket&& socket, reciveHandlerT reviceHandler) :
+	socket_(std::move(socket)),
+	reciveHandler_(reviceHandler)
 {
 
 }
@@ -31,29 +34,26 @@ void Session::Recive()
 		if (!ec)
 		{
 			std::string msg(buffer_.data(), bytes);
-			std::cout << msg << std::endl;
-
-			Send();
+			std::async(std::launch::async, reciveHandler_, std::move(msg), self);
 		}
 		else
 		{
-			std::cout << ec.message() << std::endl;
+			std::cout << ec.message() << std::endl;//if error, session ends
 		}
 	});
 }
 
-void Session::Send()
+void Session::Response(std::string msg)
 {
-	std::string s("{\"clockResponse\":\"response\"}");
 	auto self = shared_from_this();
 	ba::async_write(
 		socket_,
-		ba::buffer(s.data(), s.size()),
+		ba::buffer(msg.data(), msg.size()),
 		[this, self](errorT ec, size_t bytes)
 	{
 		if (!ec)
 			Recive();
 		else
-			std::cout << ec.message() << std::endl;
+			std::cout << ec.message() << std::endl;//if error, session ends
 	});
 }

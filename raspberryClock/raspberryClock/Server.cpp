@@ -13,6 +13,22 @@ Server::Server() :
 
 Server::~Server()
 {
+	Stop();
+}
+
+void Server::Start(reciveHandlerT reciveHandler)
+{
+	reciveHandler_ = reciveHandler;
+
+	Accept();
+
+	serviceTh_ = std::thread([this]() { io_service_.run(); });
+
+	listener_.Start();
+}
+
+void Server::Stop()
+{
 	try
 	{
 		if (!io_service_.stopped())
@@ -20,16 +36,7 @@ Server::~Server()
 		if (serviceTh_.joinable())
 			serviceTh_.join();
 	}
-	catch (const std::exception&) { }//ignore
-}
-
-void Server::Start()
-{
-	Accept();
-
-	serviceTh_ = std::thread([this]() { io_service_.run(); });
-
-	listener_.Start();
+	catch (const std::exception&) {}//ignore
 }
 
 void Server::Accept()
@@ -38,7 +45,9 @@ void Server::Accept()
 	{
 		if (!ec)
 		{
-			std::make_shared<Session>(std::move(socket_))->Start();
+			std::make_shared<Session>(
+				std::move(socket_),
+				reciveHandler_)->Start();
 		}
 		else
 		{

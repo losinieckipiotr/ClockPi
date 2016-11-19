@@ -6,8 +6,15 @@
 #include <boost/asio.hpp>
 
 #include <thread>
+#include <functional>
+#include <string>
+#include <memory>
 
 namespace baip = boost::asio::ip;
+
+class Session;
+
+using reciveHandlerT = std::function<void(std::string, std::shared_ptr<Session>)>;
 
 class Server
 {
@@ -15,7 +22,8 @@ public:
 	Server();
 	~Server();
 
-	void Start();
+	void Start(reciveHandlerT reciveHandler);
+	void Stop();
 
 private:
 	void Accept();
@@ -24,6 +32,8 @@ private:
 	{
 		SERVER_PORT = 2016
 	};
+
+	reciveHandlerT reciveHandler_;
 
 	Listener listener_;
 
