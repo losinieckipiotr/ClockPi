@@ -28,7 +28,9 @@ int main(int argc, char* argv[])
 		udpSocet.set_option(ba::socket_base::broadcast(true));
 
 		string hostRequest = "{\"getClockHost\":false}";
-		udpSocet.send_to(ba::buffer(hostRequest), udpEndpoint);
+		udpSocet.send_to(
+			ba::buffer(hostRequest.data(), hostRequest.size()),
+			udpEndpoint);
 
 		std::array<char, BUFFER_SIZE> buffArr;
 
