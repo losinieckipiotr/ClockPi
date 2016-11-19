@@ -25,9 +25,8 @@ Listener::~Listener()
 
 void Listener::Start()
 {
-	baip::udp::endpoint listen_endpoint(
-		baip::address_v4::from_string("0.0.0.0"),
-		LISTENER_PORT);
+	baip::udp::endpoint listen_endpoint(baip::address_v4(), LISTENER_PORT);
+
 	socket_.open(listen_endpoint.protocol());
 	socket_.set_option(baip::udp::socket::reuse_address(true));
 	socket_.bind(listen_endpoint);
@@ -49,15 +48,16 @@ void Listener::Recive()
 			if (msg == "{\"getClockHost\":false}")
 				Response();
 		}
+		//TO DO: Error handle
+		Recive();
 	});
 }
 
 void Listener::Response()
 {
-	std::string s("<{\"getClockHost\":true}>");
+	std::string s("{\"getClockHost\":true}");
 	socket_.async_send_to(
 		ba::buffer(s.data(), s.size()),
 		remoteEndpoint_,
-		[](const errorT&, size_t) { }); // empty handler, ignore errors
-	Recive();
+		[](const errorT&, size_t) { }); //empty handler, ignore errors
 }

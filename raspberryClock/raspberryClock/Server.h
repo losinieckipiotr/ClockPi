@@ -20,6 +20,11 @@ public:
 private:
 	void Accept();
 
+	enum
+	{
+		SERVER_PORT = 2016
+	};
+
 	Listener listener_;
 
 	boost::asio::io_service io_service_;

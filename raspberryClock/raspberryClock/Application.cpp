@@ -173,9 +173,9 @@ void Application::DisplayMeasure(const Result& res)
 	screen_.Write(x2, h2, strPre, font);
 	screen_.Display();
 
-	cout << strTemp << endl;
-	cout << strPre << endl;
-	cout << endl;
+	//cout << strTemp << endl;
+	//cout << strPre << endl;
+	//cout << endl;
 }
 
 void Application::DisplayClock(const timeP& now)
@@ -205,9 +205,9 @@ void Application::DisplayClock(const timeP& now)
 	screen_.Write(centerPos, 0, dateStr, font1);
 	screen_.Write(0, 16, timeStr, font2);
 
-	cout << dateStr << endl;
-	cout << timeStr << endl;
-	cout << endl;
+	//cout << dateStr << endl;
+	//cout << timeStr << endl;
+	//cout << endl;
 
 	screen_.Display();
 }

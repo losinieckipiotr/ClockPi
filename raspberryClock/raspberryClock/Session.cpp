@@ -44,10 +44,11 @@ void Session::Recive()
 
 void Session::Send()
 {
+	std::string s("{\"clockResponse\":\"response\"}");
 	auto self = shared_from_this();
 	ba::async_write(
 		socket_,
-		ba::buffer(buffer_, buffer_.size()),
+		ba::buffer(s.data(), s.size()),
 		[this, self](errorT ec, size_t bytes)
 	{
 		if (!ec)

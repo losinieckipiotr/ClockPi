@@ -6,7 +6,7 @@
 
 Server::Server() :
 	socket_(io_service_),
-	acceptor_(io_service_, baip::tcp::endpoint(baip::address_v4(), 2016))
+	acceptor_(io_service_, baip::tcp::endpoint(baip::address_v4(), SERVER_PORT))
 {
 
 }
