@@ -4,12 +4,12 @@
 
 #include <iostream>
 #include <iomanip>
-#include <string>
 #include <exception>
 #include <memory>
 #include <ctime>
 #include <fstream>
 #include <utility>
+#include <sstream>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -75,13 +75,16 @@ void Application::Start()
 	auto reciveFrameHandler =
 		[this](string recivedMsg, shared_ptr<Session> session)->void
 	{
-		cout << recivedMsg << endl;
+		lock_guard<mutex> lck(appMutex_);
 
-		auto response = recivedMsg;
-		for (auto& c : response)
-			c = toupper(c);
-
-		session->Response(response);
+		try
+		{
+			reciveHandler_.FrameHandler(recivedMsg, session, resultsCollection_);
+		}
+		catch (const std::exception& ex)
+		{
+			cout << ex.what() << endl;
+		}
 	};
 
 	server_.Start(reciveFrameHandler);

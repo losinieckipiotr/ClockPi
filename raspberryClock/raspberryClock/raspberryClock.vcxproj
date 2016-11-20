@@ -170,6 +170,7 @@
     <ClInclude Include="AlarmManager.h" />
     <ClInclude Include="fakeWiringPi.hpp" />
     <ClInclude Include="Listener.h" />
+    <ClInclude Include="ReciveHandler.hpp" />
     <ClInclude Include="Result.hpp" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Session.h" />

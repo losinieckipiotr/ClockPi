@@ -21,6 +21,7 @@ Session::~Session()
 
 void Session::Start()
 {
+	socket_.set_option(ba::ip::tcp::no_delay(true));
 	Recive();
 }
 
@@ -43,17 +44,30 @@ void Session::Recive()
 	});
 }
 
-void Session::Response(std::string msg)
+void Session::Send(std::string msg, bool async)
 {
-	auto self = shared_from_this();
-	ba::async_write(
-		socket_,
-		ba::buffer(msg.data(), msg.size()),
-		[this, self](errorT ec, size_t bytes)
+	if (async)
 	{
-		if (!ec)
-			Recive();
-		else
-			std::cout << ec.message() << std::endl;//if error, session ends
-	});
+		auto self = shared_from_this();
+		ba::async_write(
+			socket_,
+			ba::buffer(msg.data(), msg.size()),
+			[this, self](errorT ec, size_t bytes)
+		{
+			if (ec)
+				std::cout << ec.message() << std::endl;
+			//TO DO: error handle
+
+		});
+	}
+	else
+	{
+		errorT ec;
+		ba::write(
+			socket_,
+			ba::buffer(msg.data(), msg.size()), ec);
+		if(ec)
+			std::cout << ec.message() << std::endl;
+			//TO DO: error handle
+	}
 }

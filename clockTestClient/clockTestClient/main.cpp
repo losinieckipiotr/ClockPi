@@ -1,12 +1,21 @@
 #include <iostream>
 #include <array>
+#include <string>
+#include <sstream>
 
 #include <boost/asio.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <vector>
+
+#include "Result.hpp"
 
 using namespace std;
 
 namespace ba = boost::asio;
 namespace baip = boost::asio::ip;
+namespace pt = boost::property_tree;
 
 enum
 {
@@ -14,6 +23,72 @@ enum
 	SERVER_PORT = 2016,
 	LISTENER_PORT = 2017
 };
+
+class Response
+{
+public:
+	Response(string json)
+	{
+		stringstream ss(json);
+
+		pt::ptree tree;
+		pt::read_json(ss, tree);
+		auto& respNode = tree.get_child("response");
+
+		id = respNode.get<int>("id");
+		state = respNode.get<int>("state");
+		length = respNode.get<int>("length");
+	}
+	Response(int id, int state, int length)
+		: id(id), state(state), length(length) { }
+
+	string ToJSON()
+	{
+		pt::ptree tree;
+		pt::ptree response;
+
+		response.put("id", id);
+		response.put("state", state);
+		response.put("length", length);
+
+		tree.add_child("response", response);
+
+		stringstream ss;
+		pt::write_json(ss, tree);
+		return ss.str();
+	}
+
+	int id;
+	int state;
+	int length;
+};
+
+int ctr = 0;
+
+string getRequest(const string& reqName)
+{
+	pt::ptree tree;
+	pt::ptree request;
+
+	request.put("id", ctr++);
+	request.put("name", reqName);
+
+	tree.add_child("request", request);
+
+	stringstream ss;
+	pt::write_json(ss, tree);
+	return ss.str();
+}
+
+string getResult()
+{
+	return getRequest("getLastResult");
+}
+
+string getHistory()
+{
+	return getRequest("getResultsHistory");
+}
 
 int main(int argc, char* argv[])
 {
@@ -48,18 +123,60 @@ int main(int argc, char* argv[])
 		{
 			cout << "Enter message: " << endl;
 			getline(cin, msg);
+			if (msg == "result")
+			{
+				msg = getResult();
+				ba::write(tcpSocket, ba::buffer(msg.data(), msg.length()));
+				auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
 
-			ba::write(tcpSocket, boost::asio::buffer(msg.data(), msg.length()));
+				msg = string(buffArr.data(), recBytes);
 
-			auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
-			cout << "Reply is: " << endl;
-			msg = string(buffArr.data(), recBytes);
-			cout << msg << endl;
+				cout << msg << endl;
+
+				Response resp(msg);
+				if (resp.state == 1)
+				{
+					size_t l = resp.length;
+					vector<char> buf(l);
+					auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
+					string msg2(buf.data(), recBytes2);
+
+					cout << msg2 << endl;
+				}
+			}
+				
+			else if (msg == "history")
+			{
+				msg = getHistory();
+				ba::write(tcpSocket, ba::buffer(msg.data(), msg.length()));
+				auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
+
+				msg = string(buffArr.data(), recBytes);
+
+				cout << msg << endl;
+
+				Response resp(msg);
+				if (resp.state == 1)
+				{
+					size_t bytesToRecive = resp.length;
+					while (bytesToRecive > 0)
+					{
+						vector<char> buf(bytesToRecive);
+						auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
+						bytesToRecive -= recBytes2;
+
+						string msg2(buf.data(), recBytes2);
+						cout << msg2 << endl;
+					}
+				}
+			}	
+			else
+				continue;
 		}
 	}
 	catch (std::exception& e)
 	{
-		cout << "Exception: " << e.what() << "\n";
+		cout << "Exception: " << e.what() << endl;
 	}
 
 	return 0;

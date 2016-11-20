@@ -21,11 +21,10 @@ public:
 
 	void Start();
 
-	void Response(std::string msg);
-
-private:
+	void Send(std::string msg, bool async = true);
 	void Recive();
 
+private:
 	enum { BUFFER_SIZE = 1024 };
 
 	baip::tcp::socket socket_;

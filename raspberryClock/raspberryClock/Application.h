@@ -4,6 +4,7 @@
 #include "WiringPi.h"
 
 #include "Result.hpp"
+#include "ReciveHandler.hpp"
 
 #include "SSD1306.h"
 #include "BMP180.h"
@@ -18,6 +19,7 @@
 #include <mutex>
 #include <atomic>
 #include <chrono>
+#include <string>
 
 using timeP = std::chrono::system_clock::time_point;
 
@@ -46,6 +48,9 @@ private:
 	void DisplayClock(const timeP& now);
 	void LoopDelay(const timeP& now);
 
+	std::string GetLastResult();
+	std::string GetResultsHistory();
+
 	void LoadResults();
 	void SaveResults();
 
@@ -61,6 +66,8 @@ private:
 	Button button_;
 
 	Server server_;
+
+	ReciveHandler reciveHandler_;
 
 	std::deque<Result> resultsCollection_;
 
