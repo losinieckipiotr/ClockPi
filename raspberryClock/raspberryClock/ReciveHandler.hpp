@@ -71,7 +71,7 @@ public:
 		tree.add_child("response", response);
 
 		stringstream ss;
-		write_json(ss, tree);
+		write_json(ss, tree, false);
 		return ss.str();
 	}
 
@@ -106,8 +106,7 @@ public:
 		Response resp(req.id, 1, respMsg.length());
 		string respJSON = resp.ToJSON();
 
-		session->Send(respJSON, false);
-		session->Send(respMsg);
+		session->Send(respJSON, respMsg);
 		session->Recive();
 	}
 
@@ -128,7 +127,7 @@ private:
 
 		tree.put_child("result", result);
 		stringstream ss;
-		write_json(ss, tree);
+		write_json(ss, tree, false);
 
 		return ss.str();
 	}
@@ -152,7 +151,7 @@ private:
 		tree.add_child("results", results);
 
 		stringstream ss;
-		write_json(ss, tree);
+		write_json(ss, tree, false);
 
 		return ss.str();
 	}

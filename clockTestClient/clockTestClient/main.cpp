@@ -159,15 +159,34 @@ int main(int argc, char* argv[])
 				if (resp.state == 1)
 				{
 					size_t bytesToRecive = resp.length;
-					while (bytesToRecive > 0)
-					{
-						vector<char> buf(bytesToRecive);
-						auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
-						bytesToRecive -= recBytes2;
+					vector<char> history(resp.length);
 
-						string msg2(buf.data(), recBytes2);
+					boost::system::error_code ec;
+					ba::read(
+						tcpSocket,
+						ba::buffer(history.data(), history.size()), 
+						ec);
+
+					if (ec)
+					{
+						cout << ec.message() << endl;
+						return 0;
+					}
+					else
+					{
+						string msg2(history.data(), history.size());
 						cout << msg2 << endl;
 					}
+
+					/*
+					vector<char> buf(BUFFER_SIZE);
+					auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
+					bytesToRecive -= recBytes2;
+					history.insert(history.end(), buf.begin(), buf.begin() + recBytes2);
+					*/
+
+					//string msg2(buf.data(), recBytes2);
+					//cout << msg2 << endl;
 				}
 			}	
 			else

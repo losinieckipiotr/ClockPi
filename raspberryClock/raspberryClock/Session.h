@@ -21,7 +21,7 @@ public:
 
 	void Start();
 
-	void Send(std::string msg, bool async = true);
+	void Send(const std::string& resp, const std::string& msg);
 	void Recive();
 
 private:

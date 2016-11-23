@@ -44,30 +44,48 @@ void Session::Recive()
 	});
 }
 
-void Session::Send(std::string msg, bool async)
+void Session::Send(const std::string& resp, const std::string& msg)
 {
-	if (async)
-	{
-		auto self = shared_from_this();
-		ba::async_write(
-			socket_,
-			ba::buffer(msg.data(), msg.size()),
-			[this, self](errorT ec, size_t bytes)
-		{
-			if (ec)
-				std::cout << ec.message() << std::endl;
-			//TO DO: error handle
+	auto self = shared_from_this();
 
-		});
-	}
-	else
+	//send response
+	ba::async_write(
+		socket_,
+		ba::buffer(resp.data(), resp.size()),
+		ba::transfer_all(),
+		[this, self, resp, msg](errorT ec, size_t bytes)
 	{
-		errorT ec;
-		ba::write(
-			socket_,
-			ba::buffer(msg.data(), msg.size()), ec);
-		if(ec)
-			std::cout << ec.message() << std::endl;
+		if (!ec)
+		{
+			if (bytes != resp.size())
+			{
+				//TO DO: error handle
+				std::cout << "Not all data was transfered" << std::endl;
+				return;//session ends
+			}
+
+			errorT ec2;
+			//send message
+			auto bytes2 = ba::write(socket_,
+				ba::buffer(msg.data(), msg.size()),
+				ba::transfer_all(), ec2);
+			if (ec2)
+			{
+				if (bytes2 != msg.size())
+				{
+					std::cout << "Not all data was transfered" << std::endl;
+				}
+				else
+				{
+					//TO DO: error handle
+					std::cout << ec2.message() << std::endl;
+				}
+			}
+		}
+		else
+		{
 			//TO DO: error handle
-	}
+			std::cout << ec.message() << std::endl;
+		}
+	});
 }
