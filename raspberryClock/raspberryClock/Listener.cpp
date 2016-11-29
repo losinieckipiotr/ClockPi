@@ -45,7 +45,7 @@ void Listener::Recive()
 		if (!ec)
 		{
 			std::string msg(buffer_.data(), bytes);
-			if (msg == "{\"getClockHost\":false}")
+			if (msg == "{\"getClockHost\":false}\n")
 				Response();
 		}
 		//TO DO: Error handle
@@ -55,7 +55,7 @@ void Listener::Recive()
 
 void Listener::Response()
 {
-	std::string s("{\"getClockHost\":true}");
+	std::string s("{\"getClockHost\":true}\n");
 	socket_.async_send_to(
 		ba::buffer(s.data(), s.size()),
 		remoteEndpoint_,

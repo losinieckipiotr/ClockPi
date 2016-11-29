@@ -52,14 +52,19 @@ void Application::Start()
         DisplayClock(system_clock::now());
         buzzer_.On();
     };
-	auto disableAlarmHandler = [this]() { buzzer_.Off(); alarmRinging_ = false; };
+	auto disableAlarmHandler = [this]()
+	{
+		buzzer_.Off(); alarmRinging_ = false;
+	};
+	alarmMan_.SetAlarmHandler(alarmHandler);
+	alarmMan_.SetDisableHandler(disableAlarmHandler);
+
 	auto setMinute = [this, alarmHandler, disableAlarmHandler]()
 	{
         const auto alarmTime_t = system_clock::to_time_t(
         system_clock::now() + chrono::minutes(1));
         const auto timeStruct = localtime(&alarmTime_t);
-		alarmMan_.SetAlarm(	timeStruct->tm_hour, timeStruct->tm_min,
-							alarmHandler, disableAlarmHandler);
+		alarmMan_.SetAlarm(	timeStruct->tm_hour, timeStruct->tm_min);
 	};
 	auto clickHandler = [this]() { if(!alarmRinging_) NextDisplayMode(); };
 	auto holdHandler = [this, setMinute]()
@@ -69,7 +74,6 @@ void Application::Start()
 		else
 			setMinute();
     };
-
 	button_.Setup(clickHandler, holdHandler);
 
 	auto reciveFrameHandler =
@@ -79,14 +83,17 @@ void Application::Start()
 
 		try
 		{
-			reciveHandler_.FrameHandler(recivedMsg, session, resultsCollection_);
+			reciveHandler_.FrameHandler(
+				recivedMsg,
+				session,
+				resultsCollection_,
+				alarmMan_);
 		}
 		catch (const std::exception& ex)
 		{
 			cout << ex.what() << endl;
 		}
 	};
-
 	server_.Start(reciveFrameHandler);
 
 	appFlag_ = true;//application exit flag
@@ -95,7 +102,6 @@ void Application::Start()
 	cin.get();//locks main thread
 
 	server_.Stop();
-
 	appFlag_ = false;
 	measureTh_.join();
 

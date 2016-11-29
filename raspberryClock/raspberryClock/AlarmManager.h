@@ -15,13 +15,15 @@ public:
 	~AlarmManager();
 
 	bool IsAlarmSet() { return isSet_; }
-	timeP GetAlarmTime();
-	void SetAlarm(
-		int hours, int minutes,//h:00-23 m:00-59
-		handlerT alarmHandler, handlerT disableHandler);
-	void DisableAlarm();
+	void SetAlarmHandler(handlerT alarmHandler) { alarmHandler_ = alarmHandler; }
+	void SetDisableHandler(handlerT disableHandler) { disableHandler_ = disableHandler; }
 
+	void SetAlarm(int hours, int minutes);
+
+	void DisableAlarm();
 	void ClearAlarm();
+
+	timeP GetAlarmTime() const;
 
 private:
 	void StartWorker();
@@ -32,6 +34,7 @@ private:
 	bool workerFlag_;
 
 	timeP alarmTime_;
+
 	handlerT alarmHandler_;
 	handlerT disableHandler_;
 

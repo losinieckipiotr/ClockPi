@@ -9,7 +9,9 @@
 
 #include <vector>
 
-#include "Result.hpp"
+#include "Response.h"
+#include "Result.h"
+#include "Request.h"
 
 using namespace std;
 
@@ -24,70 +26,52 @@ enum
 	LISTENER_PORT = 2017
 };
 
-class Response
-{
-public:
-	Response(string json)
-	{
-		stringstream ss(json);
-
-		pt::ptree tree;
-		pt::read_json(ss, tree);
-		auto& respNode = tree.get_child("response");
-
-		id = respNode.get<int>("id");
-		state = respNode.get<int>("state");
-		length = respNode.get<int>("length");
-	}
-	Response(int id, int state, int length)
-		: id(id), state(state), length(length) { }
-
-	string ToJSON()
-	{
-		pt::ptree tree;
-		pt::ptree response;
-
-		response.put("id", id);
-		response.put("state", state);
-		response.put("length", length);
-
-		tree.add_child("response", response);
-
-		stringstream ss;
-		pt::write_json(ss, tree);
-		return ss.str();
-	}
-
-	int id;
-	int state;
-	int length;
-};
-
 int ctr = 0;
-
-string getRequest(const string& reqName)
-{
-	pt::ptree tree;
-	pt::ptree request;
-
-	request.put("id", ctr++);
-	request.put("name", reqName);
-
-	tree.add_child("request", request);
-
-	stringstream ss;
-	pt::write_json(ss, tree);
-	return ss.str();
-}
 
 string getResult()
 {
-	return getRequest("getLastResult");
+	Request r;
+	r.id = ctr++;
+	r.name = "getLastResult";
+
+	return r.ToJSON();
 }
 
 string getHistory()
 {
-	return getRequest("getResultsHistory");
+	Request r;
+	r.id = ctr++;
+	r.name = "getResultsHistory";
+
+	return r.ToJSON();
+}
+
+string getAlarm()
+{
+	Request r;
+	r.id = ctr++;
+	r.name = "getAlarmTime";
+
+	return r.ToJSON();
+}
+string setAlarm()
+{
+	Request r;
+	r.id = ctr++;
+	r.name = "setClockAlarm";
+
+	r.params.emplace("hour", to_string(16));
+	r.params.emplace("minute", to_string(0));
+
+	return r.ToJSON();
+}
+string disableAlarm()
+{
+	Request r;
+	r.id = ctr++;
+	r.name = "disableClockAlarm";
+
+	return r.ToJSON();
 }
 
 int main(int argc, char* argv[])
@@ -102,7 +86,7 @@ int main(int argc, char* argv[])
 		udpSocet.set_option(baip::udp::socket::reuse_address(true));
 		udpSocet.set_option(ba::socket_base::broadcast(true));
 
-		string hostRequest = "{\"getClockHost\":false}";
+		string hostRequest = "{\"getClockHost\":false}\n";
 		udpSocet.send_to(
 			ba::buffer(hostRequest.data(), hostRequest.size()),
 			udpEndpoint);
@@ -111,7 +95,7 @@ int main(int argc, char* argv[])
 
 		size_t bytes = udpSocet.receive_from(ba::buffer(buffArr.data(), BUFFER_SIZE), serverEp);
 		string response(buffArr.data(), bytes);
-		if (response != "{\"getClockHost\":true}")
+		if (response != "{\"getClockHost\":true}\n")
 			return 1;
 
 		ba::ip::tcp::socket tcpSocket(io_service);
@@ -123,74 +107,59 @@ int main(int argc, char* argv[])
 		{
 			cout << "Enter message: " << endl;
 			getline(cin, msg);
+
 			if (msg == "result")
 			{
 				msg = getResult();
-				ba::write(tcpSocket, ba::buffer(msg.data(), msg.length()));
-				auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
-
-				msg = string(buffArr.data(), recBytes);
-
-				cout << msg << endl;
-
-				Response resp(msg);
-				if (resp.state == 1)
-				{
-					size_t l = resp.length;
-					vector<char> buf(l);
-					auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
-					string msg2(buf.data(), recBytes2);
-
-					cout << msg2 << endl;
-				}
 			}
-				
 			else if (msg == "history")
 			{
 				msg = getHistory();
-				ba::write(tcpSocket, ba::buffer(msg.data(), msg.length()));
-				auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
-
-				msg = string(buffArr.data(), recBytes);
-
-				cout << msg << endl;
-
-				Response resp(msg);
-				if (resp.state == 1)
-				{
-					size_t bytesToRecive = resp.length;
-					vector<char> history(resp.length);
-
-					boost::system::error_code ec;
-					ba::read(
-						tcpSocket,
-						ba::buffer(history.data(), history.size()), 
-						ec);
-
-					if (ec)
-					{
-						cout << ec.message() << endl;
-						return 0;
-					}
-					else
-					{
-						string msg2(history.data(), history.size());
-						cout << msg2 << endl;
-					}
-
-					/*
-					vector<char> buf(BUFFER_SIZE);
-					auto recBytes2 = tcpSocket.read_some(ba::buffer(buf.data(), buf.size()));
-					bytesToRecive -= recBytes2;
-					history.insert(history.end(), buf.begin(), buf.begin() + recBytes2);
-					*/
-
-					//string msg2(buf.data(), recBytes2);
-					//cout << msg2 << endl;
-				}
-			}	
+			}
+			else if (msg == "time")
+			{
+				msg = getAlarm();
+			}
+			else if (msg == "alarm")
+			{
+				msg = setAlarm();
+			}
+			else if (msg == "disable")
+			{
+				msg = disableAlarm();
+			}
 			else
+			{
 				continue;
+			}
+
+			ba::write(tcpSocket, ba::buffer(msg.data(), msg.length()));
+			auto recBytes = tcpSocket.read_some(ba::buffer(buffArr.data(), BUFFER_SIZE));
+
+			msg = string(buffArr.data(), recBytes);
+			cout << msg << endl;
+
+			Response resp(msg);
+			if (resp.state == 1 && resp.length > 0)
+			{
+				size_t bytesToRecive = resp.length;
+				vector<char> respBuff(resp.length);
+				boost::system::error_code ec;
+				ba::read(
+					tcpSocket,
+					ba::buffer(respBuff.data(), respBuff.size()),
+					ec);
+				if (!ec)
+				{
+					string msg2(respBuff.data(), respBuff.size());
+					cout << msg2 << endl;
+				}
+				else
+				{
+					cout << ec.message() << endl;
+					return 0;
+				}
+			}
 		}
 	}
 	catch (std::exception& e)

@@ -21,7 +21,7 @@ public:
 
 	void Start();
 
-	void Send(const std::string& resp, const std::string& msg);
+	void Send(std::string resp, std::string msg);
 	void Recive();
 
 private:

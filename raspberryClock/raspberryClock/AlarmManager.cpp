@@ -18,7 +18,7 @@ AlarmManager::~AlarmManager()
 	StopWorker();
 }
 
-timeP AlarmManager::GetAlarmTime()
+timeP AlarmManager::GetAlarmTime() const
 {
 	if (isSet_)
 		return alarmTime_;
@@ -26,9 +26,7 @@ timeP AlarmManager::GetAlarmTime()
 		return system_clock::time_point();//epoch
 }
 
-void AlarmManager::SetAlarm(
-	int hours, int minutes,
-	handlerT alarmHandler, handlerT disableHandler)
+void AlarmManager::SetAlarm(int hours, int minutes)
 {
 	const auto now = system_clock::now();
 	const auto timeT = system_clock::to_time_t(now);
@@ -43,12 +41,10 @@ void AlarmManager::SetAlarm(
 	alarmTime_ = alarmTimePoint;
 	isSet_ = true;
 
-	alarmHandler_ = alarmHandler;
-	disableHandler_ = disableHandler;
-
 	StartWorker();
 
-	cout << "Alarm was set to: " << ctime(&alarmTime);
+	auto t = system_clock::to_time_t(alarmTime_);
+	cout << "Alarm was set to: " << ctime(&t);
 }
 
 void AlarmManager::DisableAlarm()
@@ -56,7 +52,7 @@ void AlarmManager::DisableAlarm()
 	if(isSet_)
     {
         ClearAlarm();
-        disableHandler_();//TO DO: TRY CATCH
+		if (disableHandler_) disableHandler_();
     }
     else
         ClearAlarm();
@@ -92,7 +88,7 @@ void AlarmManager::WorkerFunc()
 		const auto now = system_clock::now();
 		if (alarmTime_ <= now)
 		{
-			alarmHandler_();//TO DO: TRY CATCH
+			if (alarmHandler_) alarmHandler_();
 			workerFlag_ = false;
 
 			cout << "Alarm !!!" << endl;

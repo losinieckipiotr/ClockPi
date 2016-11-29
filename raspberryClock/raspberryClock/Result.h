@@ -4,9 +4,8 @@
 #include <chrono>
 #include <string>
 
-class Result
+struct Result
 {
-public:
 	float temperature;
 	float pressure;
 	std::chrono::system_clock::time_point timeStamp;

@@ -44,7 +44,7 @@ void Session::Recive()
 	});
 }
 
-void Session::Send(const std::string& resp, const std::string& msg)
+void Session::Send(std::string resp, std::string msg)
 {
 	auto self = shared_from_this();
 
@@ -64,6 +64,7 @@ void Session::Send(const std::string& resp, const std::string& msg)
 				return;//session ends
 			}
 
+			if (msg.length() == 0) return;
 			errorT ec2;
 			//send message
 			auto bytes2 = ba::write(socket_,

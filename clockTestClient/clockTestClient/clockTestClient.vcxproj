@@ -151,9 +151,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Request.cpp" />
+    <ClCompile Include="Response.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Result.hpp" />
+    <ClInclude Include="Request.h" />
+    <ClInclude Include="Response.h" />
+    <ClInclude Include="Result.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

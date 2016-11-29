@@ -3,8 +3,8 @@
 
 #include "WiringPi.h"
 
-#include "Result.hpp"
-#include "ReciveHandler.hpp"
+#include "Result.h"
+#include "ReciveHandler.h"
 
 #include "SSD1306.h"
 #include "BMP180.h"
@@ -47,9 +47,6 @@ private:
 	void DisplayMeasure(const Result& res);
 	void DisplayClock(const timeP& now);
 	void LoopDelay(const timeP& now);
-
-	std::string GetLastResult();
-	std::string GetResultsHistory();
 
 	void LoadResults();
 	void SaveResults();
