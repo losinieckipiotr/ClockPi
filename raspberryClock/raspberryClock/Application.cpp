@@ -10,6 +10,7 @@
 #include <fstream>
 #include <utility>
 #include <sstream>
+#include <streambuf>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -19,7 +20,7 @@ using namespace chrono;
 namespace pt = boost::property_tree;
 
 constexpr auto FILE_NAME_JSON = "measurement.json";
-//constexpr auto FILE_NAME_CSV = "measurement.csv";
+constexpr auto FILE_NAME_CSV = "measurement.csv";
 
 Application::Application() : alarmRinging_(false), mode_(DisplayMode::COLCK)
 {
@@ -99,6 +100,7 @@ void Application::Start()
 	appFlag_ = true;//application exit flag
 	measureTh_ = thread([this]() { DisplayLoop(); });//main loop
 
+	cout << "Raspberry Clock" << endl;
 	cin.get();//locks main thread
 
 	server_.Stop();
@@ -250,28 +252,53 @@ void Application::LoadResults()
 {
 	try
 	{
-		pt::ptree tree;
-		pt::read_json(FILE_NAME_JSON, tree);
-		auto& resultsNode = tree.get_child("results");
-		for (pt::ptree::value_type& val : resultsNode)
+		ifstream file(FILE_NAME_CSV, ios::in | ios::binary);
+		string buf;
+		file.seekg(0, ios::end);
+		buf.resize(static_cast<size_t>(file.tellg()));
+		file.seekg(0, ios::beg);
+		file.read(&buf[0], buf.size());
+		file.close();
+
+		stringstream ss(move(buf));
+		buf.clear();
+		while (ss)
 		{
 			Result res;
-			res.temperature = val.second.get<float>("temperature");
-			res.pressure = val.second.get<float>("pressure");
+			getline(ss, buf, ',');
+			res.temperature = stof(buf);
+			buf.clear();
+			getline(ss, buf, ',');
+			res.pressure = stof(buf);
+			buf.clear();
+			getline(ss, buf, '\n');
 			system_clock::time_point t;//epoch
-			system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
+			system_clock::duration sysClockTicks(stoll(buf));
 			res.timeStamp = t + sysClockTicks;
 			resultsCollection_.push_back(move(res));
 		}
+
+		//pt::ptree tree;
+		//pt::read_json(FILE_NAME_JSON, tree);
+		//auto& resultsNode = tree.get_child("results");
+		//for (pt::ptree::value_type& val : resultsNode)
+		//{
+		//	Result res;
+		//	res.temperature = val.second.get<float>("temperature");
+		//	res.pressure = val.second.get<float>("pressure");
+		//	system_clock::time_point t;//epoch
+		//	system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
+		//	res.timeStamp = t + sysClockTicks;
+		//	resultsCollection_.push_back(move(res));
+		//}
 	}
 	catch (const std::exception&) { } //ignore
 }
 
 void Application::SaveResults()
 {
-	pt::ptree tree;
+	/*pt::ptree tree;
 	pt::ptree results;
-
 	for (const auto& res : resultsCollection_)
 	{
 		pt::ptree node;
@@ -281,14 +308,16 @@ void Application::SaveResults()
 		results.push_back(make_pair("", node));
 	}
 	tree.add_child("results", results);
+	pt::write_json(FILE_NAME_JSON, tree, locale(), false);*/
 
-	pt::write_json(FILE_NAME_JSON, tree);
-
-	/*ofstream file(FILE_NAME_CSV, ios::trunc);
+	string buf;
 	for (const auto& res : resultsCollection_)
 	{
-		file << res.temperature << ',';
-		file << res.pressure << ',';
-		file << res.timeStamp.time_since_epoch().count() << endl;
-	}*/
+		buf += to_string(res.temperature) + ',';
+		buf += to_string(res.pressure) + ',';
+		buf += to_string(res.timeStamp.time_since_epoch().count()) + '\n';
+	}
+	ofstream file(FILE_NAME_CSV, ios::trunc | ios::binary);
+	file.write(buf.data(), buf.size());
+	file.close();
 }
