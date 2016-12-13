@@ -62,13 +62,12 @@ string ReciveHandler::GetLastResult(resultColletionT resultsColletion)
 
 	ptree tree;
 	ptree result;
+	stringstream ss;
 
 	result.put("temperature", res.temperature);
 	result.put("pressure", res.pressure);
 	result.put("timeStamp", res.timeStamp.time_since_epoch().count());
-
 	tree.put_child("result", result);
-	stringstream ss;
 	write_json(ss, tree, false);
 
 	return ss.str();
@@ -76,21 +75,18 @@ string ReciveHandler::GetLastResult(resultColletionT resultsColletion)
 
 string ReciveHandler::GetResultsHistory(resultColletionT resultsColletion)
 {
-	ptree tree;
-	ptree results;
+	stringstream ss;
 
 	for (const auto& res : resultsColletion)
 	{
+		ptree tree;
 		ptree node;
 		node.put("temperature", res.temperature);
 		node.put("pressure", res.pressure);
 		node.put("timeStamp", res.timeStamp.time_since_epoch().count());
-		results.push_back(make_pair("", node));
+		tree.put_child("result", node);
+		write_json(ss, tree, false);
 	}
-	tree.add_child("results", results);
-
-	stringstream ss;
-	write_json(ss, tree, false);
 
 	return ss.str();
 }

@@ -278,19 +278,19 @@ void Application::LoadResults()
 			resultsCollection_.push_back(move(res));
 		}
 
-		//pt::ptree tree;
-		//pt::read_json(FILE_NAME_JSON, tree);
-		//auto& resultsNode = tree.get_child("results");
-		//for (pt::ptree::value_type& val : resultsNode)
-		//{
-		//	Result res;
-		//	res.temperature = val.second.get<float>("temperature");
-		//	res.pressure = val.second.get<float>("pressure");
-		//	system_clock::time_point t;//epoch
-		//	system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
-		//	res.timeStamp = t + sysClockTicks;
-		//	resultsCollection_.push_back(move(res));
-		//}
+		/*pt::ptree tree;
+		pt::read_json(FILE_NAME_JSON, tree);
+		auto& resultsNode = tree.get_child("results");
+		for (pt::ptree::value_type& val : resultsNode)
+		{
+			Result res;
+			res.temperature = val.second.get<float>("temperature");
+			res.pressure = val.second.get<float>("pressure");
+			system_clock::time_point t;//epoch
+			system_clock::duration sysClockTicks(val.second.get<long long>("timeStamp"));
+			res.timeStamp = t + sysClockTicks;
+			resultsCollection_.push_back(move(res));
+		}*/
 	}
 	catch (const std::exception&) { } //ignore
 }
