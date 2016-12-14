@@ -1,8 +1,11 @@
 package com.piotr.losiniecki.smartclockpi;
 
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new MyCustomAdapter(this, arrayList);
         mList.setAdapter(mAdapter);
 
+        WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        wifi.setWifiEnabled(true);
+
         // connect to the server
         new connectTask().execute("");
 
@@ -44,19 +50,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String message = editText.getText().toString();
+                try {
+                    String message = editText.getText().toString();
 
-                //add the text in the arrayList
-                arrayList.add("c: " + message);
+                    //add the text in the arrayList
+                    arrayList.add("c: " + message);
 
-                //sends the message to the server
-                if (mTcpClient != null) {
-                    mTcpClient.sendMessage(message);
+                    //sends the message to the server
+                    if (mTcpClient != null) {
+                        mTcpClient.sendMessage(message);
+                    }
+
+                    //refresh the list
+                    mAdapter.notifyDataSetChanged();
+                    editText.setText("");
+                } catch (Exception e) {
+                    Log.e("Main_Activity", "onClick error", e);
                 }
-
-                //refresh the list
-                mAdapter.notifyDataSetChanged();
-                editText.setText("");
             }
         });
     }
