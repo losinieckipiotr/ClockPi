@@ -80,10 +80,10 @@ void Application::Start()
 	auto reciveFrameHandler =
 		[this](string recivedMsg, shared_ptr<Session> session)->void
 	{
-		lock_guard<mutex> lck(appMutex_);
-
 		try
 		{
+			lock_guard<mutex> lck(appMutex_);
+
 			reciveHandler_.FrameHandler(
 				recivedMsg,
 				session,

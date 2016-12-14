@@ -1,9 +1,14 @@
 #include "Listener.h"
 
-#include <string>
+#include <sstream>
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace ba = boost::asio;
 using errorT = boost::system::error_code;
+using namespace std;
+using namespace boost::property_tree;
 
 Listener::Listener() :
 	socket_(io_service_)
@@ -45,7 +50,7 @@ void Listener::Recive()
 		if (!ec)
 		{
 			std::string msg(buffer_.data(), bytes);
-			if (msg == "{\"getClockHost\":false}\n")
+			if (ValidateMsg(msg))
 				Response();
 		}
 		//TO DO: Error handle
@@ -60,4 +65,20 @@ void Listener::Response()
 		ba::buffer(s.data(), s.size()),
 		remoteEndpoint_,
 		[](const errorT&, size_t) { }); //empty handler, ignore errors
+}
+
+bool Listener::ValidateMsg(const std::string& msg)
+{
+	try
+	{
+		stringstream ss(msg);
+		ptree tree;
+		read_json(ss, tree);
+		bool val = tree.get<bool>("getClockHost");
+		if (val == false)
+			return true;
+	}
+	catch (exception& ex) {} //ignore
+
+	return false;
 }

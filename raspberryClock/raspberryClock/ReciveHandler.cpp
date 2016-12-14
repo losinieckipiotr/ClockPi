@@ -1,5 +1,6 @@
 #include "ReciveHandler.h"
 
+#include <iostream>
 #include <sstream>
 #include <chrono>
 #include <stdexcept>
@@ -17,42 +18,46 @@ void ReciveHandler::FrameHandler(
 	resultColletionT resultsColletion,
 	AlarmManager& alarmMan)
 {
-	//note: if error session should be destoyed
+	try {
+		Request req(recivedMsg);
+		string respMsg("");
 
-	Request req(recivedMsg);
-	string respMsg("");
+		if (req.name == "getLastResult")
+		{
+			respMsg = GetLastResult(resultsColletion);
+		}
+		else if (req.name == "getResultsHistory")
+		{
+			respMsg = GetResultsHistory(resultsColletion);
+		}
+		else if (req.name == "getAlarmTime")
+		{
+			respMsg = GetAlarmTime(alarmMan);
+		}
+		else if (req.name == "setClockAlarm")
+		{
+			int hour = stoi(req.params["hour"]);
+			int minute = stoi(req.params["minute"]);
+			SetClockAlarm(hour, minute, alarmMan);
+		}
+		else if (req.name == "disableClockAlarm")
+		{
+			DisableClockAlarm(alarmMan);
+		}
+		else
+		{
+			throw runtime_error("unknown request");
+		}
 
-	if (req.name == "getLastResult")
-	{
-		respMsg = GetLastResult(resultsColletion);
-	}
-	else if (req.name == "getResultsHistory")
-	{
-		respMsg = GetResultsHistory(resultsColletion);
-	}
-	else if (req.name == "getAlarmTime")
-	{
-		respMsg = GetAlarmTime(alarmMan);
-	}
-	else if (req.name == "setClockAlarm")
-	{
-		int hour = stoi(req.params["hour"]);
-		int minute = stoi(req.params["minute"]);
-		SetClockAlarm(hour, minute, alarmMan);
-	}
-	else if (req.name == "disableClockAlarm")
-	{
-		DisableClockAlarm(alarmMan);
-	}
-	else
-	{
-		throw runtime_error("unknow request");
-	}
+		Response resp(req.id, 1, respMsg.length());
+		string respJSON = resp.ToJSON();
 
-	Response resp(req.id, 1, respMsg.length());
-	string respJSON = resp.ToJSON();
-
-	session->Send(move(respJSON), move(respMsg));
+		session->Send(move(respJSON), move(respMsg));
+	}
+	catch (exception& ex)
+	{
+		cout << ex.what() << endl;
+	}
 	session->Recive();
 }
 

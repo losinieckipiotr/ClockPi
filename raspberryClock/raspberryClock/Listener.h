@@ -5,6 +5,7 @@
 
 #include <thread>
 #include <array>
+#include <string>
 
 namespace baip = boost::asio::ip;
 
@@ -19,6 +20,8 @@ public:
 private:
 	void Recive();
 	void Response();
+
+	bool ValidateMsg(const std::string& msg);
 
 	enum
 	{
