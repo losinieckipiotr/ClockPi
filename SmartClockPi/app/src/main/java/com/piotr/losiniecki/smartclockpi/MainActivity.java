@@ -8,97 +8,107 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-
-import java.lang.String;
-
-import java.util.ArrayList;
-
-import com.piotr.losiniecki.smartclockpi.*;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private ListView mList;
-    private ArrayList<String> arrayList;
-    private MyCustomAdapter mAdapter;
     private TCPClient mTcpClient;
+    private boolean serverConnected = false;
+
+    private ProgressBar connectBar;
+    private TextView textBox;
+    private Button resultButton;
+
+    private TextView temperature;
+    private TextView pressure;
+    private TextView time;
+
+    private void serverConnected() {
+        serverConnected = true;
+        connectBar.setVisibility(View.GONE);
+        resultButton.setVisibility(View.VISIBLE);
+        textBox.setText(R.string.connected_main_activity);
+    }
+
+    private void connectToServer() {
+        connectBar.setVisibility(View.VISIBLE);
+        resultButton.setVisibility(View.GONE);
+        textBox.setText(R.string.connecting_main_activity);
+        new ConnectTask().execute();
+    }
+
+    private class ConnectTask extends AsyncTask<Void,Void,Void> {
+        @Override
+        protected Void doInBackground(Void... args) {
+            mTcpClient.connectToServer();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            serverConnected();
+        }
+    }
+
+    private class getResultTask extends AsyncTask<Void, Void, Result> {
+        @Override
+        protected Result doInBackground(Void... args) {
+            return mTcpClient.getLastResult();
+        }
+        @Override
+        protected void onPostExecute(Result result) {
+            if (result != null) {
+                //temperature.setVisibility(View.VISIBLE);
+                temperature.setText("Temperature: " + Double.toString(result.temperature));
+
+                //pressure.setVisibility(View.VISIBLE);
+                pressure.setText("Pressure: " + Double.toString(result.pressure));
+
+                //time.setVisibility(View.VISIBLE);
+                time.setText("Time: " +
+                        Integer.toString(result.timeStamp.hour) +
+                        ":" +
+                        Integer.toString(result.timeStamp.minute));
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        arrayList = new ArrayList<String>();
+        textBox = (TextView) findViewById(R.id.connectingTxt);
+        connectBar = (ProgressBar) findViewById(R.id.connectBar);
+        resultButton = (Button) findViewById(R.id.resultButton);
 
-        final EditText editText = (EditText) findViewById(R.id.editText);
-        Button send = (Button)findViewById(R.id.send_button);
-
-        //relate the listView from java to the one created in xml
-        mList = (ListView)findViewById(R.id.list);
-        mAdapter = new MyCustomAdapter(this, arrayList);
-        mList.setAdapter(mAdapter);
+        temperature = (TextView) findViewById(R.id.temp);
+        pressure = (TextView) findViewById(R.id.press);
+        time = (TextView) findViewById(R.id.time);
 
         WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         wifi.setWifiEnabled(true);
 
-        // connect to the server
-        new connectTask().execute("");
-
-        send.setOnClickListener(new View.OnClickListener() {
+        mTcpClient = new TCPClient(new TCPClient.RpcClient() {
             @Override
-            public void onClick(View view) {
+            public void onServerDisconnected() {
+                serverConnected = false;
+                Log.i("MainActivity", "onServerDisconnected");
+            }
+        });
 
+        resultButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 try {
-                    String message = editText.getText().toString();
-
-                    //add the text in the arrayList
-                    arrayList.add("c: " + message);
-
-                    //sends the message to the server
-                    if (mTcpClient != null) {
-                        mTcpClient.sendMessage(message);
-                    }
-
-                    //refresh the list
-                    mAdapter.notifyDataSetChanged();
-                    editText.setText("");
+                    new getResultTask().execute();
                 } catch (Exception e) {
-                    Log.e("Main_Activity", "onClick error", e);
+                    Log.e("MainActivity", "resultButton", e);
                 }
             }
         });
-    }
 
-    public class connectTask extends AsyncTask<String,String,TCPClient> {
-
-        @Override
-        protected TCPClient doInBackground(String... message) {
-
-            //we create a TCPClient object and
-            mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
-                @Override
-                //here the messageReceived method is implemented
-                public void messageReceived(String message) {
-                    //this method calls the onProgressUpdate
-                    publishProgress(message);
-                }
-            });
-            mTcpClient.run();
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-
-            //in the arrayList we add the messaged received from server
-            arrayList.add(values[0]);
-            // notify the adapter that the data set has changed. This means that new message received
-            // from server was added to the list
-            mAdapter.notifyDataSetChanged();
-        }
+        connectToServer();
     }
 }

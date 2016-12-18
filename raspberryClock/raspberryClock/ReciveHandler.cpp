@@ -63,15 +63,18 @@ void ReciveHandler::FrameHandler(
 
 string ReciveHandler::GetLastResult(resultColletionT resultsColletion)
 {
+	using namespace chrono;
 	auto& res = resultsColletion.back();
 
 	ptree tree;
 	ptree result;
 	stringstream ss;
 
+	milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+
 	result.put("temperature", res.temperature);
 	result.put("pressure", res.pressure);
-	result.put("timeStamp", res.timeStamp.time_since_epoch().count());
+	result.put("timeStamp", duration_cast<milliseconds>(res.timeStamp.time_since_epoch()).count());
 	tree.put_child("result", result);
 	write_json(ss, tree, false);
 
