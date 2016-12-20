@@ -28,6 +28,8 @@ timeP AlarmManager::GetAlarmTime() const
 
 void AlarmManager::SetAlarm(int hours, int minutes)
 {
+	DisableAlarm();
+
 	const auto now = system_clock::now();
 	const auto timeT = system_clock::to_time_t(now);
 	auto localTimeStruct = localtime(&timeT);
@@ -77,7 +79,7 @@ void AlarmManager::StopWorker()
 {
 	workerFlag_ = false;
 	if (worker_.joinable())
-		worker_.join();
+		worker_.detach();
 }
 
 void AlarmManager::WorkerFunc()

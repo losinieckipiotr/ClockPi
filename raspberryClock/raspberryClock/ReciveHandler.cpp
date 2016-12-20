@@ -129,5 +129,5 @@ void ReciveHandler::SetClockAlarm(int hour, int minute, AlarmManager& alarmMan)
 
 void ReciveHandler::DisableClockAlarm(AlarmManager& alarmMan)
 {
-	if (alarmMan.IsAlarmSet()) alarmMan.DisableAlarm();
+	alarmMan.DisableAlarm();
 }

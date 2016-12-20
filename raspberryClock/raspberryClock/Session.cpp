@@ -44,7 +44,7 @@ void Session::Recive()
 	});
 }
 
-void Session::Send(std::string resp, std::string msg)
+void Session::Send(const std::string resp, const std::string msg)
 {
 	auto self = shared_from_this();
 
