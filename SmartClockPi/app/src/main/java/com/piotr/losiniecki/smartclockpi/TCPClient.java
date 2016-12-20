@@ -9,113 +9,47 @@ import java.net.Socket;
 import android.util.Log;
 import java.nio.charset.StandardCharsets;
 
-import android.util.JsonWriter;
-import java.io.StringWriter;
-
 import java.io.StringReader;
 import android.util.JsonReader;
 
 public class TCPClient {
 
-    public static final String BROADCAST_ADR = "255.255.255.255";
-    public static final int SERVER_PORT = 2016;
-    public static final int LISTENER_PORT = 2017;
+    private static final String BROADCAST_ADR = "255.255.255.255";
+    private static final int SERVER_PORT = 2016;
+    private static final int LISTENER_PORT = 2017;
 
-    RpcClient rpc = null;
+    private RpcClient rpc = null;
 
     private int requestCtr = 0;
 
     private InetAddress serverAdr = null;
-
     private Socket connectSocket = null;
     private PrintWriter out = null;
     private BufferedReader in = null;
 
-    private void beginRequest(JsonWriter writer) throws IOException {
-        writer.beginObject();
-        writer.name("request");
-        writer.beginObject();
-        writer.name("id").value(requestCtr++);
+    private Request getResultRequest() {
+        return new Request(requestCtr++, "getLastResult");
     }
 
-    private void endRequest(JsonWriter writer) throws IOException {
-        writer.endObject();
-        writer.endObject();
-        writer.close();
+    private String getHistoryRequest() {
+        Request req = new Request(requestCtr++, "getResultsHistory");
+        return req.toJSON();
     }
 
-    private String getResultRequest() throws IOException {
-        StringWriter str = new StringWriter();
-        JsonWriter writer = new JsonWriter(str);
-
-        beginRequest(writer);
-
-        writer.name("name").value("getLastResult");
-        writer.name("params").value("");
-
-        endRequest(writer);
-
-        return str.toString();
+    private Request getAlarmTimeRequest() {
+        return new Request(requestCtr++, "getAlarmTime");
     }
 
-    private String getHistoryRequest() throws IOException {
-        StringWriter str = new StringWriter();
-        JsonWriter writer = new JsonWriter(str);
-
-        beginRequest(writer);
-
-        writer.name("name").value("getResultsHistory");
-        writer.name("params").value("");
-
-        endRequest(writer);
-
-        return str.toString();
-    }
-
-    private String getAlarmTimeRequest() throws IOException {
-        StringWriter str = new StringWriter();
-        JsonWriter writer = new JsonWriter(str);
-
-        beginRequest(writer);
-
-        writer.name("name").value("getAlarmTime");
-        writer.name("params").value("");
-
-        endRequest(writer);
-
-        return str.toString();
-    }
-
-    private String getSetAlarmRequest() throws IOException {
-        StringWriter str = new StringWriter();
-        JsonWriter writer = new JsonWriter(str);
-
-        beginRequest(writer);
-
-        writer.name("name").value("setClockAlarm");
-        writer.name("params");
-        writer.beginObject();
-        writer.name("hour").value(16);
-        writer.name("minute").value(0);
-        writer.endObject();
-
-        endRequest(writer);
-
-        return str.toString();
+    private String getSetAlarmRequest() {
+        Request req = new Request(requestCtr++, "setClockAlarm");
+        req.params.put("hour", "16");
+        req.params.put("minute", "0");
+        return req.toJSON();
     }
 
     private String getDisableAlarmRequest() throws IOException {
-        StringWriter str = new StringWriter();
-        JsonWriter writer = new JsonWriter(str);
-
-        beginRequest(writer);
-
-        writer.name("name").value("disableClockAlarm");
-        writer.name("params").value("");
-
-        endRequest(writer);
-
-        return str.toString();
+        Request req = new Request(requestCtr++, "disableClockAlarm");
+        return req.toJSON();
     }
 
     private void getServerAdr() {
@@ -164,22 +98,14 @@ public class TCPClient {
     }
 
     private void disconnect() {
-        try {
-            connectSocket = null;
-            out = null;
-            in = null;
-            rpc.onServerDisconnected();
-        } catch (Exception e) {
-            Log.e("TCPClient", "disconnect", e);
-        }
+        connectSocket = null;
+        out = null;
+        in = null;
+        rpc.onServerDisconnected();
     }
 
     public TCPClient(RpcClient rpcClient) {
         rpc = rpcClient;
-    }
-
-    public void stopClient() {
-        disconnect();
     }
 
     public void connectToServer() {
@@ -191,10 +117,37 @@ public class TCPClient {
         }
     }
 
-    public Result getLastResult() {
+    public AlarmTime getAlarmTime() {
+        AlarmTime alarmTime = null;
         try {
             if (out != null && !out.checkError()) {
-                String msg = getResultRequest();
+                Request req = getAlarmTimeRequest();
+                String msg = req.toJSON();
+                if (msg != null)
+                    out.println(msg);
+                out.flush();
+
+                String respJSON = in.readLine();
+                String alarmTimeJSON = in.readLine();
+
+                Response response = Response.getFromJSON(respJSON);
+                if(req.id == response.id && response.state == 1) {
+                    alarmTime = AlarmTime.getFromJSON(alarmTimeJSON);
+                }
+            }
+        } catch (Exception e) {
+            disconnect();
+            Log.e("TCPClient", "sendMessage", e);
+        }
+        return alarmTime;
+    }
+
+    public Result getLastResult() {
+        Result res = null;
+        try {
+            if (out != null && !out.checkError()) {
+                Request req = getResultRequest();
+                String msg = req.toJSON();
                 if (msg != null)
                     out.println(msg);
                 out.flush();
@@ -203,14 +156,16 @@ public class TCPClient {
                 String resultJSON = in.readLine();
 
                 Response response = Response.getFromJSON(respJSON);
-                Result lastResult = Result.getFromJSON(resultJSON);
-                return lastResult;
+                if(req.id == response.id && response.state == 1) {
+                    res = Result.getFromJSON(resultJSON);
+                }
             }
         } catch (Exception e) {
-            disconnect();
             Log.e("TCPClient", "sendMessage", e);
         }
-        return null;
+        if (res == null)
+            disconnect();
+        return res;
     }
 
     public interface RpcClient {

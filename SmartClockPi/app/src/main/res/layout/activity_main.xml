@@ -4,19 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:weightSum="1"
+    android:elevation="1dp">
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="15dp" />
+        android:layout_height="16dp" />
 
     <TextView
         android:text="@string/connecting_main_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/connectingTxt"
+        android:id="@+id/infoBox"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary" />
 
     <Space
         android:layout_width="match_parent"
@@ -27,7 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/connectBar"
-        android:indeterminate="true" />
+        android:indeterminate="true"
+        android:visibility="gone" />
 
     <Button
         android:text="Last Result"
@@ -41,20 +45,75 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/temp"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@color/colorAccent" />
 
     <TextView
         android:text="Pressure:"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/press"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@color/colorAccent" />
 
     <TextView
         android:text="Time:"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/time"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@color/colorAccent" />
+
+    <Button
+        android:text="Refresh alarm time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/alarmTimeButton" />
+
+    <TextView
+        android:text="Alarm not set"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/alarmBox"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@color/colorAccent" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="5dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+        <NumberPicker
+            android:id="@+id/hourPicker"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_weight="1"/>
+
+
+        <NumberPicker
+            android:id="@+id/minutePicker"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+
+
+    <Button
+        android:text="Set Alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/setAlarmButton" />
+
+    <Button
+        android:text="Disable alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/disableAlarmButton" />
 
 </LinearLayout>
