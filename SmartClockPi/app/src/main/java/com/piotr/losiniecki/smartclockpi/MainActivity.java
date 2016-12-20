@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.NumberPicker;
 
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import android.os.Handler;
@@ -26,33 +27,51 @@ public class MainActivity extends AppCompatActivity {
     private TextView infoBox;
     private ProgressBar connectBar;
 
-    private Button resultButton;
     private TextView temperature;
     private TextView pressure;
     private TextView time;
-
-    private Button alarmTimeButton;
     private TextView alarmBox;
 
-    private NumberPicker hourPick;
-    private NumberPicker minutePick;
+    private TimePicker timePicker;
+    private Button setAlarmButton;
+    private Button disableAlarmButton;
 
     Handler mainHandler;
 
     private void connectingToServer() {
         serverConnected = false;
+
+        infoBox.setVisibility(View.VISIBLE);
         connectBar.setVisibility(View.VISIBLE);
-        resultButton.setVisibility(View.GONE);
-        infoBox.setText(R.string.connecting_main_activity);
+
+        temperature.setVisibility(View.GONE);
+        pressure.setVisibility(View.GONE);
+        time.setVisibility(View.GONE);
+        alarmBox.setVisibility(View.GONE);
+
+        timePicker.setVisibility(View.GONE);
+        setAlarmButton.setVisibility(View.GONE);
+        disableAlarmButton.setVisibility(View.GONE);
+
         new ConnectTask().execute();
     }
 
     private void serverConnected() {
         serverConnected = true;
+
+        infoBox.setVisibility(View.GONE);
         connectBar.setVisibility(View.GONE);
-        resultButton.setVisibility(View.VISIBLE);
-        infoBox.setText(R.string.connected_main_activity);
-        new GetAlarmTimeTask();
+
+        temperature.setVisibility(View.VISIBLE);
+        pressure.setVisibility(View.VISIBLE);
+        time.setVisibility(View.VISIBLE);
+        alarmBox.setVisibility(View.VISIBLE);
+
+        timePicker.setVisibility(View.VISIBLE);
+        setAlarmButton.setVisibility(View.VISIBLE);
+        disableAlarmButton.setVisibility(View.VISIBLE);
+
+        new GetAlarmTimeTask().execute();
     }
 
     private void updateAlarmTime(AlarmTime alarmTime) {
@@ -84,21 +103,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class GetAlarmTimeTask extends AsyncTask<Void, Void, AlarmTime> {
-        @Override
-        protected AlarmTime doInBackground(Void... args) {
-            return mTcpClient.getAlarmTime();
-        }
-        @Override
-        protected void onPostExecute(AlarmTime alarmTime) {
-            try {
-                updateAlarmTime(alarmTime);
-            } catch (Exception e) {
-                Log.e("MainActivity", "IsAlarmSetTask", e);
-            }
-        }
-    }
-
     private class GetResultTask extends AsyncTask<Void, Void, Result> {
         @Override
         protected Result doInBackground(Void... args) {
@@ -119,10 +123,80 @@ public class MainActivity extends AppCompatActivity {
                     time.setText(t);
                 }
             } catch (Exception e) {
-                Log.e("MainActivity", "getResultTask", e);
+                Log.e("MainActivity", "GetResultTask", e);
             }
         }
     }
+
+    private class GetAlarmTimeTask extends AsyncTask<Void, Void, AlarmTime> {
+        @Override
+        protected AlarmTime doInBackground(Void... args) {
+            return mTcpClient.getAlarmTime();
+        }
+        @Override
+        protected void onPostExecute(AlarmTime alarmTime) {
+            try {
+                updateAlarmTime(alarmTime);
+            } catch (Exception e) {
+                Log.e("MainActivity", "GetAlarmTimeTask", e);
+            }
+        }
+    }
+
+    private class SetAlarmTask extends AsyncTask<Integer, Void, Void> {
+        @Override
+        protected Void doInBackground(Integer... args) {
+            if (args.length == 2 && args[0] != null && args[1] != null)
+                mTcpClient.setAlarmTime(args[0], args[1]);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            try {
+                new GetAlarmTimeTask().execute();
+            } catch (Exception e) {
+                Log.e("MainActivity", "SetAlarmTask", e);
+            }
+        }
+    }
+
+    private class DisableAlarmTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... args) {
+            mTcpClient.dsiableAlarmTime();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            try {
+                new GetAlarmTimeTask().execute();
+            } catch (Exception e) {
+                Log.e("MainActivity", "DisableAlarmTask", e);
+            }
+        }
+    }
+
+    private class RefreshThread extends Thread {
+        public void run() {
+            while (true) {
+                try {
+                    sleep(1000);
+                    if (serverConnected) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                new GetResultTask().execute();
+                                new GetAlarmTimeTask().execute();
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    Log.e("MainActivity", "RefreshThread", e);
+                }
+            }
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,20 +206,16 @@ public class MainActivity extends AppCompatActivity {
         infoBox = (TextView) findViewById(R.id.infoBox);
         connectBar = (ProgressBar) findViewById(R.id.connectBar);
 
-        resultButton = (Button) findViewById(R.id.resultButton);
         temperature = (TextView) findViewById(R.id.temp);
         pressure = (TextView) findViewById(R.id.press);
         time = (TextView) findViewById(R.id.time);
 
-        alarmTimeButton = (Button) findViewById(R.id.alarmTimeButton);
         alarmBox = (TextView) findViewById(R.id.alarmBox);
 
-        hourPick = (NumberPicker) findViewById(R.id.hourPicker);
-        hourPick.setMinValue(0);
-        hourPick.setMaxValue(24);
-        minutePick = (NumberPicker) findViewById(R.id.minutePicker);
-        minutePick.setMinValue(0);
-        minutePick.setMaxValue(60);
+        timePicker = (TimePicker) findViewById(R.id.timePicker);
+
+        setAlarmButton = (Button) findViewById(R.id.setAlarmButton);
+        disableAlarmButton = (Button) findViewById(R.id.disableAlarmButton);
 
         mainHandler = new Handler(getApplicationContext().getMainLooper());
 
@@ -167,28 +237,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        resultButton.setOnClickListener(new View.OnClickListener() {
+        setAlarmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    new GetResultTask().execute();
-                } catch (Exception e) {
-                    Log.e("MainActivity", "resultButton", e);
-                }
+                //int hour = hourPick.getValue();
+                //int minute = minutePick.getValue();
+                int hour = timePicker.getHour();
+                int minute = timePicker.getMinute();
+                new SetAlarmTask().execute(hour, minute);
             }
         });
 
-        alarmTimeButton.setOnClickListener(new View.OnClickListener() {
+        disableAlarmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    new GetAlarmTimeTask().execute();
-                } catch (Exception e) {
-                    Log.e("MainActivity", "alarmTimeButton", e);
-                }
+                new DisableAlarmTask().execute();
             }
         });
 
         connectingToServer();
+        new RefreshThread().start();
     }
 }
