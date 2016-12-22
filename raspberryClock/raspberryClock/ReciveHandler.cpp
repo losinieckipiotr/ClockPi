@@ -18,6 +18,9 @@ void ReciveHandler::FrameHandler(
 	resultColletionT resultsColletion,
 	AlarmManager& alarmMan)
 {
+    cout.write(recivedMsg.data(), recivedMsg.length());
+    cout.flush();
+
 	try {
 		Request req(recivedMsg);
 		string respMsg("");
@@ -51,6 +54,9 @@ void ReciveHandler::FrameHandler(
 
 		Response resp(req.id, 1, respMsg.length());
 		string respJSON = resp.ToJSON();
+
+		cout.write(respMsg.data(), respMsg.length());
+        cout.flush();
 
 		session->Send(move(respJSON), move(respMsg));
 	}

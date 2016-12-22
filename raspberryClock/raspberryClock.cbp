@@ -43,6 +43,13 @@
 		<Unit filename="raspberryClock/Buzzer.h" />
 		<Unit filename="raspberryClock/Listener.cpp" />
 		<Unit filename="raspberryClock/Listener.h" />
+		<Unit filename="raspberryClock/ReciveHandler.cpp" />
+		<Unit filename="raspberryClock/ReciveHandler.h" />
+		<Unit filename="raspberryClock/Request.cpp" />
+		<Unit filename="raspberryClock/Request.h" />
+		<Unit filename="raspberryClock/Response.cpp" />
+		<Unit filename="raspberryClock/Response.h" />
+		<Unit filename="raspberryClock/Result.h" />
 		<Unit filename="raspberryClock/Result.hpp" />
 		<Unit filename="raspberryClock/SSD1306.cpp" />
 		<Unit filename="raspberryClock/SSD1306.h" />
@@ -52,7 +59,6 @@
 		<Unit filename="raspberryClock/Session.h" />
 		<Unit filename="raspberryClock/WiringPi.cpp" />
 		<Unit filename="raspberryClock/WiringPi.h" />
-		<Unit filename="raspberryClock/fakeWiringPi.hpp" />
 		<Unit filename="raspberryClock/main.cpp" />
 		<Extensions>
 			<code_completion />
