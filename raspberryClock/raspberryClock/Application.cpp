@@ -55,26 +55,20 @@ void Application::Start()
     };
 	auto disableAlarmHandler = [this]()
 	{
-		buzzer_.Off(); alarmRinging_ = false;
+		buzzer_.Off();
+		alarmRinging_ = false;
 	};
 	alarmMan_.SetAlarmHandler(alarmHandler);
 	alarmMan_.SetDisableHandler(disableAlarmHandler);
 
-	auto setMinute = [this, alarmHandler, disableAlarmHandler]()
+	auto clickHandler = [this]()
 	{
-        const auto alarmTime_t = system_clock::to_time_t(
-        system_clock::now() + chrono::minutes(1));
-        const auto timeStruct = localtime(&alarmTime_t);
-		alarmMan_.SetAlarm(	timeStruct->tm_hour, timeStruct->tm_min);
+		if(!alarmRinging_)
+			NextDisplayMode();
 	};
-	auto clickHandler = [this]() { if(!alarmRinging_) NextDisplayMode(); };
-	auto holdHandler = [this, setMinute]()
-	{
-		if (alarmMan_.IsAlarmSet())
-			alarmMan_.DisableAlarm();
-		else
-			setMinute();
-    };
+	auto holdHandler = [this]() {
+		alarmMan_.DisableAlarm();
+	};
 	button_.Setup(clickHandler, holdHandler);
 
 	auto reciveFrameHandler =

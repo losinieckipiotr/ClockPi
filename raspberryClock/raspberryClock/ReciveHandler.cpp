@@ -18,6 +18,7 @@ void ReciveHandler::FrameHandler(
 	resultColletionT resultsColletion,
 	AlarmManager& alarmMan)
 {
+	//LOG
     cout.write(recivedMsg.data(), recivedMsg.length());
     cout.flush();
 
@@ -28,10 +29,6 @@ void ReciveHandler::FrameHandler(
 		if (req.name == "getLastResult")
 		{
 			respMsg = GetLastResult(resultsColletion);
-		}
-		else if (req.name == "getResultsHistory")
-		{
-			respMsg = GetResultsHistory(resultsColletion);
 		}
 		else if (req.name == "getAlarmTime")
 		{
@@ -55,8 +52,9 @@ void ReciveHandler::FrameHandler(
 		Response resp(req.id, 1, respMsg.length());
 		string respJSON = resp.ToJSON();
 
-		cout.write(respMsg.data(), respMsg.length());
-        cout.flush();
+		//LOG
+		cout.write(respJSON.data(), respJSON.length());
+		cout.flush();
 
 		session->Send(move(respJSON), move(respMsg));
 	}
