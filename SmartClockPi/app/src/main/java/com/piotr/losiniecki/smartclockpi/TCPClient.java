@@ -18,7 +18,7 @@ public class TCPClient {
     private static final int SERVER_PORT = 2016;
     private static final int LISTENER_PORT = 2017;
 
-    private RpcClient rpc = null;
+    private OnServerDisconnected onDisconnected = null;
 
     private int requestCtr = 0;
 
@@ -31,11 +31,6 @@ public class TCPClient {
         return new Request(requestCtr++, "getLastResult");
     }
 
-    private String getHistoryRequest() {
-        Request req = new Request(requestCtr++, "getResultsHistory");
-        return req.toJSON();
-    }
-
     private Request getAlarmTimeRequest() {
         return new Request(requestCtr++, "getAlarmTime");
     }
@@ -45,6 +40,17 @@ public class TCPClient {
         req.params.put("hour", Integer.toString(hour));
         req.params.put("minute", Integer.toString(minute));
         return req;
+    }
+
+    private Request getLEDStateRequest() {
+        return new Request(requestCtr++, "getLEDState");
+    }
+
+    private Request getSwitchLEDRequest(int state) {
+        Request req = new Request(requestCtr++, "switchLED");
+        req.params.put("state", Integer.toString(state));
+        return req;
+
     }
 
     private Request getDisableAlarmRequest() throws IOException {
@@ -101,11 +107,11 @@ public class TCPClient {
         connectSocket = null;
         out = null;
         in = null;
-        rpc.onServerDisconnected();
+        onDisconnected.onDisconnected();
     }
 
-    public TCPClient(RpcClient rpcClient) {
-        rpc = rpcClient;
+    public TCPClient(OnServerDisconnected onServerDisconnected) {
+        onDisconnected = onServerDisconnected;
     }
 
     public void connectToServer() {
@@ -142,6 +148,53 @@ public class TCPClient {
         return alarmTime;
     }
 
+    public Integer getLEDState() {
+        Integer alarmState = null;
+        try {
+            if (out != null && !out.checkError()) {
+                Request req = getLEDStateRequest();
+                String msg = req.toJSON();
+                if (msg != null)
+                    out.println(msg);
+                out.flush();
+
+                String respJSON = in.readLine();
+                String stateJSON = in.readLine();
+
+                Response response = Response.getFromJSON(respJSON);
+                if(req.id == response.id && response.state == 1) {
+                    alarmState = LEDState.getFromJSON(stateJSON);
+                }
+            }
+        } catch (Exception e) {
+            disconnect();
+            Log.e("TCPClient", "getLEDState", e);
+        }
+        return alarmState;
+    }
+
+    public void switchLED(int state) {
+        boolean responseOk = false;
+        try {
+            if (out != null && !out.checkError()) {
+                Request req = getSwitchLEDRequest(state);
+                String msg = req.toJSON();
+                if (msg != null)
+                    out.println(msg);
+                out.flush();
+
+                String respJSON = in.readLine();
+
+                Response response = Response.getFromJSON(respJSON);
+                responseOk = (req.id == response.id && response.state == 1);
+            }
+        } catch (Exception e) {
+            Log.e("TCPClient", "switchLED", e);
+        }
+        if (responseOk == false)
+            disconnect();
+    }
+
     public Result getLastResult() {
         Result res = null;
         try {
@@ -169,7 +222,7 @@ public class TCPClient {
     }
 
     public void setAlarmTime(int hour, int minute) {
-        boolean responeOk = false;
+        boolean responseOk = false;
         try {
             if (out != null && !out.checkError()) {
                 Request req = getSetAlarmRequest(hour, minute);
@@ -181,17 +234,17 @@ public class TCPClient {
                 String respJSON = in.readLine();
 
                 Response response = Response.getFromJSON(respJSON);
-                responeOk = (req.id == response.id && response.state == 1);
+                responseOk = (req.id == response.id && response.state == 1);
             }
         } catch (Exception e) {
-            Log.e("TCPClient", "sendMessage", e);
+            Log.e("TCPClient", "setAlarmTime", e);
         }
-        if (responeOk == false)
+        if (responseOk == false)
             disconnect();
     }
 
-    public void dsiableAlarmTime() {
-        boolean responeOk = false;
+    public void disableAlarmTime() {
+        boolean responseOk = false;
         try {
             if (out != null && !out.checkError()) {
                 Request req = getDisableAlarmRequest();
@@ -203,16 +256,16 @@ public class TCPClient {
                 String respJSON = in.readLine();
 
                 Response response = Response.getFromJSON(respJSON);
-                responeOk = (req.id == response.id && response.state == 1);
+                responseOk = (req.id == response.id && response.state == 1);
             }
         } catch (Exception e) {
-            Log.e("TCPClient", "sendMessage", e);
+            Log.e("TCPClient", "disableAlarmTime", e);
         }
-        if (responeOk == false)
+        if (responseOk == false)
             disconnect();
     }
 
-    public interface RpcClient {
-        void onServerDisconnected();
+    public interface OnServerDisconnected {
+        void onDisconnected();
     }
 }

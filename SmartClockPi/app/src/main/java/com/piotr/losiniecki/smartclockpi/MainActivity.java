@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TCPClient mTcpClient;
     private boolean serverConnected = false;
+    private int ledState = 0;
 
     private TextView infoBox;
     private ProgressBar connectBar;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private TimePicker timePicker;
     private Button setAlarmButton;
     private Button disableAlarmButton;
+    private Button switchLEDButton;
 
     Handler mainHandler;
 
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         timePicker.setVisibility(View.GONE);
         setAlarmButton.setVisibility(View.GONE);
         disableAlarmButton.setVisibility(View.GONE);
+        switchLEDButton.setVisibility(View.GONE);
 
         new ConnectTask().execute();
     }
@@ -70,8 +73,9 @@ public class MainActivity extends AppCompatActivity {
         timePicker.setVisibility(View.VISIBLE);
         setAlarmButton.setVisibility(View.VISIBLE);
         disableAlarmButton.setVisibility(View.VISIBLE);
+        switchLEDButton.setVisibility(View.VISIBLE);
 
-        new GetAlarmTimeTask().execute();
+        updateAll();
     }
 
     private void updateAlarmTime(AlarmTime alarmTime) {
@@ -85,6 +89,25 @@ public class MainActivity extends AppCompatActivity {
         else {
             alarmBox.setText("Alarm not set");
         }
+    }
+
+    private void updateLEDState(Integer state) {
+        if (state != null) {
+            if (state == 0) {
+                ledState = 0;
+                switchLEDButton.setTextColor(getColor(R.color.colorPrimary));
+            }
+            else if (state == 1) {
+                ledState = 1;
+                switchLEDButton.setTextColor(getColor(R.color.colorAccent));
+            }
+        }
+    }
+
+    private void updateAll() {
+        new GetResultTask().execute();
+        new GetAlarmTimeTask().execute();
+        new GetLEDStateTask().execute();
     }
 
     private class ConnectTask extends AsyncTask<Void,Void,Void> {
@@ -160,10 +183,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class GetLEDStateTask extends AsyncTask<Void, Void, Integer> {
+        @Override
+        protected Integer doInBackground(Void... args) {
+            return mTcpClient.getLEDState();
+        }
+        @Override
+        protected void onPostExecute(Integer state) {
+            try {
+                updateLEDState(state);
+            } catch (Exception e) {
+                Log.e("MainActivity", "GetLEDStateTask", e);
+            }
+        }
+    }
+
+    private class SwitchLEDTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... args) {
+            if (ledState == 0)
+                mTcpClient.switchLED(1);
+            else if (ledState == 1)
+                mTcpClient.switchLED(0);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            try {
+                new GetLEDStateTask().execute();
+            } catch (Exception e) {
+                Log.e("MainActivity", "SwitchLEDTask", e);
+            }
+        }
+    }
+
     private class DisableAlarmTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... args) {
-            mTcpClient.dsiableAlarmTime();
+            mTcpClient.disableAlarmTime();
             return null;
         }
         @Override
@@ -185,8 +242,7 @@ public class MainActivity extends AppCompatActivity {
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                new GetResultTask().execute();
-                                new GetAlarmTimeTask().execute();
+                                updateAll();
                             }
                         });
                     }
@@ -216,16 +272,17 @@ public class MainActivity extends AppCompatActivity {
 
         setAlarmButton = (Button) findViewById(R.id.setAlarmButton);
         disableAlarmButton = (Button) findViewById(R.id.disableAlarmButton);
+        switchLEDButton = (Button) findViewById(R.id.switchLEDButton);
 
         mainHandler = new Handler(getApplicationContext().getMainLooper());
 
         WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         wifi.setWifiEnabled(true);
 
-        mTcpClient = new TCPClient(new TCPClient.RpcClient() {
+        mTcpClient = new TCPClient(new TCPClient.OnServerDisconnected() {
             //this callback is not on GUI thread
             @Override
-            public void onServerDisconnected() {
+            public void onDisconnected() {
                 Runnable onServerDisconnectedHandler = new Runnable() {
                     @Override
                     public void run() {
@@ -240,8 +297,6 @@ public class MainActivity extends AppCompatActivity {
         setAlarmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //int hour = hourPick.getValue();
-                //int minute = minutePick.getValue();
                 int hour = timePicker.getHour();
                 int minute = timePicker.getMinute();
                 new SetAlarmTask().execute(hour, minute);
@@ -252,6 +307,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new DisableAlarmTask().execute();
+            }
+        });
+
+        switchLEDButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new SwitchLEDTask().execute();
             }
         });
 
