@@ -71,6 +71,8 @@ void Application::Start()
 	};
 	button_.Setup(clickHandler, holdHandler);
 
+	led_.Setup();
+
 	auto reciveFrameHandler =
 		[this](string recivedMsg, shared_ptr<Session> session)->void
 	{
@@ -82,7 +84,8 @@ void Application::Start()
 				recivedMsg,
 				session,
 				resultsCollection_,
-				alarmMan_);
+				alarmMan_,
+			    led_);
 		}
 		catch (const std::exception& ex)
 		{

@@ -16,7 +16,8 @@ void ReciveHandler::FrameHandler(
 	const string& recivedMsg,
 	shared_ptr<Session> session,
 	resultColletionT resultsColletion,
-	AlarmManager& alarmMan)
+	AlarmManager& alarmMan,
+	LED& led)
 {
 	//LOG
     cout.write(recivedMsg.data(), recivedMsg.length());
@@ -44,6 +45,18 @@ void ReciveHandler::FrameHandler(
 		{
 			DisableClockAlarm(alarmMan);
 		}
+		else if (req.name == "getLEDState")
+		{
+			respMsg = GetLEDState(led);
+		}
+		else if (req.name == "switchLED")
+		{
+			int newState = stoi(req.params["state"]);
+			if (newState == 1)
+				led.On();
+			else if (newState == 0)
+				led.Off();
+		}
 		else
 		{
 			throw runtime_error("unknown request");
@@ -54,6 +67,8 @@ void ReciveHandler::FrameHandler(
 
 		//LOG
 		cout.write(respJSON.data(), respJSON.length());
+		cout.flush();
+		cout.write(respMsg.data(), respMsg.length());
 		cout.flush();
 
 		session->Send(move(respJSON), move(respMsg));
@@ -85,24 +100,6 @@ string ReciveHandler::GetLastResult(resultColletionT resultsColletion)
 	return ss.str();
 }
 
-string ReciveHandler::GetResultsHistory(resultColletionT resultsColletion)
-{
-	stringstream ss;
-
-	for (const auto& res : resultsColletion)
-	{
-		ptree tree;
-		ptree node;
-		node.put("temperature", res.temperature);
-		node.put("pressure", res.pressure);
-		node.put("timeStamp", res.timeStamp.time_since_epoch().count());
-		tree.put_child("result", node);
-		write_json(ss, tree, false);
-	}
-
-	return ss.str();
-}
-
 string ReciveHandler::GetAlarmTime(const AlarmManager& alarmMan)
 {
 	ptree tree;
@@ -119,6 +116,18 @@ string ReciveHandler::GetAlarmTime(const AlarmManager& alarmMan)
 		tree.put("hour", timeStruct->tm_hour);
 		tree.put("minute", timeStruct->tm_min);
 	}
+
+	stringstream ss;
+	write_json(ss, tree, false);
+
+	return ss.str();
+}
+
+string ReciveHandler::GetLEDState(const LED& led)
+{
+	ptree tree;
+	string state = (led.IsOn()) ? "1" : "0";
+	tree.put("state", state);
 
 	stringstream ss;
 	write_json(ss, tree, false);

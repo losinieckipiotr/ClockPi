@@ -57,6 +57,9 @@
     <ClCompile Include="ReciveHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LED.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -104,5 +107,11 @@
     <ClInclude Include="ReciveHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LED.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

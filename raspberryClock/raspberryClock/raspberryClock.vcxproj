@@ -155,6 +155,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Buzzer.cpp" />
     <ClCompile Include="AlarmManager.cpp" />
+    <ClCompile Include="LED.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ReciveHandler.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="Buzzer.h" />
     <ClInclude Include="AlarmManager.h" />
     <ClInclude Include="fakeWiringPi.hpp" />
+    <ClInclude Include="LED.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="ReciveHandler.h" />
     <ClInclude Include="Request.h" />
@@ -181,6 +183,9 @@
     <ClInclude Include="Session.h" />
     <ClInclude Include="SSD1306.h" />
     <ClInclude Include="WiringPi.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

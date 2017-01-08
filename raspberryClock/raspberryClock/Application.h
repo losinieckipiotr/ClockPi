@@ -9,6 +9,7 @@
 #include "SSD1306.h"
 #include "BMP180.h"
 #include "Buzzer.h"
+#include "LED.h"
 #include "AlarmManager.h"
 #include "Button.h"
 
@@ -59,6 +60,7 @@ private:
     OLED::SSD1306 screen_;
 	BMP180 sensor_;
 	Buzzer buzzer_;
+	LED led_;
 	AlarmManager alarmMan_;
 	Button button_;
 
