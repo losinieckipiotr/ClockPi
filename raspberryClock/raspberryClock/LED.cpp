@@ -12,7 +12,7 @@ LED::LED()
 
 LED::~LED()
 {
-
+	Off();
 }
 
 void LED::Setup()
